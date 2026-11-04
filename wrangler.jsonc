@@ -8,6 +8,10 @@
 		"enabled": true,
 		"redact_query_string": true
 	},
+	// Runs before every `wrangler deploy` and `wrangler dev`: TACHYON_R2_BUCKET must match bucket_name.
+	"build": {
+		"command": "node scripts/check-config.mjs"
+	},
 	// Image processing (ADR 0007).
 	"images": {
 		"binding": "IMAGES"

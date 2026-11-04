@@ -89,9 +89,10 @@ async function apply( input: Buffer, step: Transform ): Promise<Buffer> {
 }
 
 /**
- *
+ * `animationAreaLimit` is the total frame area at which the binding rejects an
+ * animation with error 9413 (verified remotely: 100 megapixels).
  */
-export function fakeImages(): FakeImages {
+export function fakeImages( { animationAreaLimit = 100_000_000 } = {} ): FakeImages {
 	const binding: FakeImages = {
 		calls: [],
 		infoCalls: 0,
@@ -133,7 +134,10 @@ export function fakeImages(): FakeImages {
 					}
 					// The binding applies EXIF orientation automatically for JPEG only (verified remotely).
 					const input = sharp( await read( stream ), { animated: true } );
-					const { format } = await input.metadata();
+					const { format, width = 0, height = 0, pages = 1 } = await input.metadata();
+					if ( pages > 1 && width * height >= animationAreaLimit ) {
+						throw Object.assign( new Error( 'IMAGES_TRANSFORM_ERROR 9413: Could not resize the image: The animation is too large.' ), { code: 9413 } );
+					}
 					let data = await ( format === 'jpeg' ? input.rotate() : input ).toBuffer();
 					for ( const step of transforms ) {
 						data = await apply( data, step );

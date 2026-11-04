@@ -30,6 +30,9 @@ export const PROCESSING_VERSION = 'edge-images-3';
 /** Cloudflare Images binding input limit; larger Originals are served unmodified. */
 export const MAX_INPUT_BYTES = 20 * 1024 * 1024;
 
+/** Images binding error for animations whose frames total 100 megapixels or more; those Originals are served unmodified. */
+export const ANIMATION_TOO_LARGE = 9413;
+
 const DEFAULT_MAX_AGE = 31536000;
 
 const EXTENSION_TYPES: Record<string, string> = {
@@ -124,6 +127,18 @@ async function cacheKey( request: Request, env: Env, webp: boolean ): Promise<Re
 }
 
 /**
+ * The R2 binding cannot report its bucket, so cached Variants are only
+ * separated per bucket when `TACHYON_R2_BUCKET` names it. Without it, skip the cache.
+ */
+function cacheableOrigin( env: Env ): boolean {
+	if ( ( env.TACHYON_ORIGIN || 'r2' ) === 'r2' && ! env.TACHYON_R2_BUCKET ) {
+		console.error( 'Tachyon cache disabled: set TACHYON_R2_BUCKET to the bucket bound as BUCKET' );
+		return false;
+	}
+	return true;
+}
+
+/**
  *
  */
 function defaultCache(): Cache | undefined {
@@ -171,7 +186,7 @@ async function serve( request: Request, env: Env, context: Context ): Promise<Re
 		'Last-Modified': new Date( now * 1000 ).toUTCString(),
 	} );
 
-	const cache = request.method === 'GET' && ! tachyon.presign && ! isPrivate( env, tachyon.key ) ? defaultCache() : undefined;
+	const cache = request.method === 'GET' && ! tachyon.presign && ! isPrivate( env, tachyon.key ) && cacheableOrigin( env ) ? defaultCache() : undefined;
 	const key = cache ? await cacheKey( request, env, tachyon.webp ) : undefined;
 	if ( cache && key ) {
 		try {
@@ -307,6 +322,9 @@ async function transform( env: Env, bytes: Uint8Array, tachyon: TachyonRequest, 
 	} catch ( error ) {
 		// Binding errors describe the operation, never the request URL or secrets.
 		const { code, message } = error as { code?: number; message?: string };
+		if ( code === ANIMATION_TOO_LARGE ) {
+			return passthrough( bytesStream( bytes ), tachyon.key, headers );
+		}
 		throw internalError( `Images binding failed${ code ? ` (${ code })` : '' }: ${ message || 'unknown' }` );
 	}
 	headers.set( 'Content-Type', result.contentType() );

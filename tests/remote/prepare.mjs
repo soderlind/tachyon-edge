@@ -41,6 +41,12 @@ for ( const orientation of [ 2, 3, 4, 5, 6, 7, 8 ] ) {
 	writeFileSync( join( dir, `quadrants-o${ orientation }.webp` ), await tagged.clone().webp( { lossless: true } ).toBuffer() );
 }
 writeFileSync( join( dir, 'photo.avif' ), await sharp( join( images, 'hdr.jpg' ) ).resize( 600 ).avif().toBuffer() );
+// Animations of 1000×1000 frames on both sides of the binding's 100-megapixel animation limit (error 9413).
+const frames = await Promise.all( [ '#ff0000', '#0000ff' ].map( background => sharp( { create: { width: 1000, height: 1000, channels: 3, background } } ).png().toBuffer() ) );
+for ( const count of [ 60, 120 ] ) {
+	const inputs = Array.from( { length: count }, ( _, i ) => frames[i % 2] );
+	await sharp( inputs, { join: { animated: true } } ).gif( { delay: 100 } ).toFile( join( dir, `anim-${ count }mp.gif` ) );
+}
 
 const upload = ( file, key ) => execFileSync( 'npx', [ 'wrangler', 'r2', 'object', 'put', `${ bucket }/${ key }`, '--file', join( dir, file ), '--remote' ], { stdio: 'inherit' } );
 for ( const file of readdirSync( dir ) ) {

@@ -42,6 +42,7 @@ function env( overrides: Partial<Env> = {} ): TestEnv {
 		IMAGES: fakeImages(),
 		BUCKET: bucket(),
 		TACHYON_ORIGIN: 'r2',
+		TACHYON_R2_BUCKET: 'tachyon-uploads',
 		...overrides,
 	} as TestEnv;
 }
@@ -197,6 +198,23 @@ describe( 'encoding', () => {
 		await get( '/uploads/animated.gif?w=100', environment );
 		await get( '/uploads/photo.jpg?w=100&webp=1', environment );
 		expect( environment.IMAGES.calls.map( call => call.output.anim ) ).toEqual( [ false, false, true, true ] );
+	} );
+
+	test( 'PNG output sends no quality, because the binding ignores it', async () => {
+		const environment = env();
+		await get( '/uploads/site.png?w=100&quality=40', environment );
+		expect( environment.IMAGES.calls[0].output ).toMatchObject( {
+			format: 'image/png',
+			quality: undefined,
+		} );
+	} );
+
+	test( 'animations the binding rejects as too large (9413) are served unmodified', async () => {
+		const environment = env( { IMAGES: fakeImages( { animationAreaLimit: 1 } ) } );
+		const { response, body } = await get( '/uploads/animated.gif?w=10', environment );
+		expect( response.status ).toBe( 200 );
+		expect( response.headers.get( 'Content-Type' ) ).toBe( 'image/gif' );
+		expect( body.equals( images( 'animated.gif' ) ) ).toBe( true );
 	} );
 
 	test( 'X-WebP selects WebP', async () => {
@@ -482,6 +500,16 @@ describe( 'cache', () => {
 		await get( '/uploads/photo.jpg?w=60', other );
 		expect( store.size ).toBe( 2 );
 		expect( other.BUCKET.get ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	test( 'the R2 Origin is not cached without TACHYON_R2_BUCKET', async () => {
+		const { cache } = installCache();
+		const error = jest.spyOn( console, 'error' ).mockImplementation( () => {} );
+		const { response } = await get( '/uploads/photo.jpg?w=60', env( { TACHYON_R2_BUCKET: '' } ) );
+		expect( response.status ).toBe( 200 );
+		expect( cache.match ).not.toHaveBeenCalled();
+		expect( cache.put ).not.toHaveBeenCalled();
+		expect( error ).toHaveBeenCalledWith( expect.stringContaining( 'TACHYON_R2_BUCKET' ) );
 	} );
 
 	test( 'errors, private and signed requests are not cached', async () => {
