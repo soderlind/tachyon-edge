@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- `docs/architecture.md`: components, request flow, failure behavior, invariants and where to make common changes.
+- `scripts/check-config.mjs`, run as the Wrangler build command and in `npm test`: deploys fail when `TACHYON_R2_BUCKET` differs from the `bucket_name` bound as `BUCKET`.
+- Remote smoke test for animations on both sides of the binding's 100-megapixel limit.
+
+### Fixed
+
+- Animations whose frames total 100 megapixels or more returned 500 (binding error 9413). They are now served unmodified.
+- With the R2 Origin and an empty `TACHYON_R2_BUCKET`, the Cache API is skipped, so Variants from different buckets cannot share cache entries.
+- PNG output no longer sends a `quality` that the binding ignores, and the stale comment claiming palette PNG output is corrected.
+- README and ADR 0007 described Cloudflare's documented AVIF and animation limits rather than the behavior measured on the binding.
+
 ## [0.1.0] - 2026-11-04
 
 First release of Tachyon Edge: a rewrite of [Human Made Tachyon](https://github.com/humanmade/tachyon) v3.0.8 as a single Cloudflare Worker. It is compatible with the [Tachyon WordPress plugin](https://github.com/humanmade/tachyon-plugin) 0.11.1 (ADR 0006).

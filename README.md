@@ -21,7 +21,7 @@ WordPress (tachyon-plugin) ──► https://images.example.com/uploads/2026/11/
 
 The Worker does not rely on Cloudflare's `fit` heuristics. `geometry.ts` reproduces the arithmetic of Tachyon's Sharp pipeline, including `withoutEnlargement` rounding, JPEG shrink-on-load, EXIF rotation, `zoom` and the `px` Release Quirks. It then sends the binding explicit pixel operations ([ADR 0007](docs/adr/0007-process-with-the-cloudflare-images-binding.md)). A test oracle runs Tachyon v3.0.8's own code to check that the dimensions match ([ADR 0011](docs/adr/0011-geometry-oracle-and-remote-smoke-tests.md)).
 
-Decisions are recorded in [docs/adr](docs/adr). The project language is in [GLOSSARY.md](GLOSSARY.md).
+Components, request flow, invariants and where to make changes are described in [docs/architecture.md](docs/architecture.md). Decisions are recorded in [docs/adr](docs/adr). The project language is in [GLOSSARY.md](GLOSSARY.md).
 
 ## Deploy
 
@@ -44,7 +44,7 @@ Set these variables in [wrangler.jsonc](wrangler.jsonc):
 |---|---|
 | `TACHYON_ORIGIN` | `r2` (default) reads from the `BUCKET` binding. `http` fetches from `TACHYON_HTTP_ORIGIN`. |
 | `TACHYON_HTTP_ORIGIN` | Base URL for the HTTP Origin, e.g. `https://example.com/wp-content/`. Upstream 403 and 404 become 404; other failures become 502. |
-| `TACHYON_R2_BUCKET` | Name of the bucket bound as `BUCKET`. Keep it equal to `bucket_name`; it separates cached Variants when the binding points at another bucket. |
+| `TACHYON_R2_BUCKET` | Name of the bucket bound as `BUCKET`. It separates cached Variants per bucket. `wrangler deploy` fails if it differs from `bucket_name`, and the Worker skips its cache if it is empty. |
 | `TACHYON_KEY_PREFIX` | Prepended to every Object Key before the Origin lookup. |
 | `TACHYON_PRIVATE_PREFIXES` | Comma-separated storage key prefixes (`TACHYON_KEY_PREFIX` + Object Key) that require a valid presign, e.g. `uploads/private/`. |
 | `TACHYON_SIGNING_ACCESS_KEY_ID` | The access key ID WordPress signs private URLs with. |
@@ -73,8 +73,8 @@ These are listed in [ADR 0006](docs/adr/0006-compatibility-target-is-the-wordpre
 - **Images:** Variants have the same dimensions, but the pixels and file sizes are not byte-identical. EXIF and ICC metadata are stripped, except copyright. PNGs are truecolor rather than palette, so they are larger.
 - **Animation:** percentage crops and `entropy`/`attention` on animated images return an image instead of Tachyon's error.
 - **`zoom`:** a fractional zoomed size is rounded instead of causing an error.
-- **AVIF:** output is labelled `image/avif`, not `image/heif`. AVIF Originals need an Enterprise plan, and AVIF output is capped at 1,200 px.
-- **Size limits:** Originals over 20 MB are served unmodified. Animations over 50 megapixels are returned untransformed.
+- **AVIF:** output is labelled `image/avif`, not `image/heif`, and is capped at 1,200 px. Cloudflare documents AVIF Originals as Enterprise-only, but they worked on a non-Enterprise account in testing ([ADR 0007](docs/adr/0007-process-with-the-cloudflare-images-binding.md)).
+- **Size limits:** Originals over 20 MB, and animations whose frames total 100 megapixels or more, are served unmodified.
 
 ## Development
 

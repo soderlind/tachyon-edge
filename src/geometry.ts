@@ -308,9 +308,8 @@ export function plan( source: Source, args: TachyonArgs, webp: boolean ): Plan {
 		format = 'image/jpeg';
 		outputQuality = quality;
 	} else if ( source.format === 'png' ) {
-		// An explicit quality makes Cloudflare emit palette PNG, like Tachyon's png({ palette: true }).
+		// Tachyon emits palette PNG; the binding ignores PNG quality and always emits truecolor (Deviation, ADR 0006).
 		format = 'image/png';
-		outputQuality = 100;
 	} else if ( source.format === 'webp' ) {
 		// Sharp's default WebP quality when Tachyon does not set one.
 		format = 'image/webp';

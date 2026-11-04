@@ -132,6 +132,19 @@ describe( 'binding semantics checklist', () => {
 		expect( d.format ).toBe( 'heif' );
 		expect( d.w ).toBe( 300 );
 	}, 30000 );
+	test( 'animations are transformed below 100 megapixels and served unmodified above it', async () => {
+		const below = await fetchImg( 'anim-60mp.gif?w=100' );
+		expect( below.r.status ).toBe( 200 );
+		expect( await dims( below.body ) ).toMatchObject( {
+			w: 100,
+			h: 100,
+			pages: 60,
+		} );
+		const above = await fetchImg( 'anim-120mp.gif?w=100' );
+		expect( above.r.status ).toBe( 200 );
+		expect( above.r.headers.get( 'content-type' ) ).toBe( 'image/gif' );
+		expect( above.body.equals( local( 'anim-120mp.gif' ) ) ).toBe( true );
+	}, 60000 );
 	test( 'statuses and headers', async () => {
 		const ok = await fetchImg( 'marker.jpg?w=10' );
 		expect( ok.r.headers.get( 'cache-control' ) ).toBe( 'max-age=31536000' );
