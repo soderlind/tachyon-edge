@@ -78,7 +78,7 @@ The Worker does not retry anything. Error responses are never written to the cac
 - **Trust boundary:** the query string, path and `X-WebP` header are untrusted. `validateArgs` drops values that fail Tachyon's patterns before they reach the planner. `httpOriginUrl` stops keys from escaping the HTTP Origin base path. Presigns are trusted only after `verifyPresign`, which accepts only `AWS4-HMAC-SHA256` with `SignedHeaders=host` and no session token, rejects expiries over 7 days and dates more than 15 minutes in the future, and compares signatures in constant time.
 - **Signed key vs storage key:** WordPress signs the Object Key without `TACHYON_KEY_PREFIX`, so `verifyPresign` uses `TachyonRequest.key`. Private prefixes match the storage key (`storageKey`), so a prefix can't be bypassed by changing `TACHYON_KEY_PREFIX`.
 - **Cache boundary:** only unsigned GET requests for non-private keys use the Cache API. Presigned and private Variants are never cached by the Worker.
-- **Resource limits:** the Worker never buffers more than `MAX_INPUT_BYTES` of an Original.
+- **Resource limits:** `MAX_INPUT_BYTES` is the largest Original the Worker will transform; larger Originals are streamed through untransformed. It is not a strict memory bound: `readAtMost` appends a whole chunk before checking the limit, so it can buffer up to one chunk beyond `MAX_INPUT_BYTES` before switching to passthrough.
 - **State:** each request is independent. The only shared state is the Cache API, and its entries are immutable apart from replacement under the same key.
 
 ## Invariants
@@ -90,7 +90,7 @@ The Worker does not retry anything. Error responses are never written to the cac
 | Private storage keys are served only with a verified, unexpired Presign; missing credentials fail closed | `isPrivate`, `authorize`, `verifyPresign` | `tests/test-worker.ts` ("private prefixes and presigns"), `tests/test-sigv4.ts` |
 | A cached Variant is reused only for the same URL, processing behavior, Origin and WebP choice | `cacheKey`, `originIdentity`, `PROCESSING_VERSION` | `tests/test-worker.ts` ("cache") |
 | `TACHYON_R2_BUCKET` equals the `bucket_name` bound as `BUCKET` | `scripts/check-config.mjs` as the Wrangler build command (checks `wrangler.jsonc`, not `--var` overrides); `cacheableOrigin` skips the cache when it is empty | `tests/test-config.ts`, `tests/test-worker.ts` ("cache") |
-| Errors are not cached by browsers or the Worker | `handleRequest` (`no-store` on 5xx), `serve` (no `cache.put` on throw) | `tests/test-worker.ts` ("cache") |
+| Errors are never stored in the Worker cache; 5xx responses also forbid browser caching (404s carry no cache directive) | `serve` (no `cache.put` on throw), `handleRequest` (`no-store` on 5xx only) | `tests/test-worker.ts` ("cache") |
 | The structural binding interfaces match the real Cloudflare types | `src/bindings-check.ts` | `npm run check:worker` |
 | The fake binding mirrors verified binding behavior (JPEG-only auto-orientation, 9401 for `anim`, 9413 for animations of 100 megapixels or more, truecolor PNG) | `tests/helpers/fake-images.ts` | `npm run test:remote` against a deployed Worker |
 
