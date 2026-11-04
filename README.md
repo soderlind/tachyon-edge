@@ -1,78 +1,96 @@
-<table width="100%">
-	<tr>
-		<td align="left" colspan="2">
-			<strong>Tachyon</strong><br />
-			Faster than light image resizing service that runs on AWS. Super simple to set up, highly available and very performant.
-		</td>
-	</tr>
-	<tr>
-		<td>
-			A <strong><a href="https://hmn.md/">Human Made</a></strong> project. Maintained by @joehoyle.
-		</td>
-		<td align="center">
-			<img src="https://hmn.md/content/themes/hmnmd/assets/images/hm-logo.svg" width="100" />
-		</td>
-	</tr>
-</table>
+# Tachyon Edge
 
-Tachyon is a faster than light image resizing service that runs on AWS. Super simple to set up, highly available and very performant.
+Tachyon Edge is an image service for the [Tachyon WordPress plugin](https://github.com/humanmade/tachyon-plugin). It runs as a single Cloudflare Worker, processes images with the [Cloudflare Images binding](https://developers.cloudflare.com/images/transform-images/bindings/), and reads Originals from R2 or over HTTP.
 
+It is a drop-in replacement for [Human Made Tachyon](https://github.com/humanmade/tachyon) v3.0.8 as far as the plugin is concerned. URLs, arguments, output sizes, crops, formats, status codes and cache headers follow the Plugin Contract ([ADR 0006](docs/adr/0006-compatibility-target-is-the-wordpress-plugin.md)). Pixels and file sizes differ, because the encoder is Cloudflare's rather than Sharp's.
 
-## Setup
+## Architecture
 
-Tachyon comes in two parts: the server to serve images and the [plugin to use it](./docs/plugin.md). To use Tachyon, you need to run at least one server, as well as the plugin on all sites you want to use it.
+```
+WordPress (tachyon-plugin) ──► https://images.example.com/uploads/2026/11/photo.jpg?resize=300,200
+                                     │
+                              Cloudflare Worker (src/worker.ts)
+                                ├─ contract.ts   parse the plugin URL and arguments
+                                ├─ sigv4.ts      verify presigns for private prefixes
+                                ├─ Cache API     unsigned Variants, keyed by WebP choice
+                                ├─ origin.ts     R2 binding (BUCKET) or HTTP origin
+                                ├─ probe.ts      read dimensions and EXIF orientation from the header
+                                ├─ geometry.ts   compute Tachyon's exact output geometry
+                                └─ IMAGES        trim / squeeze / cover / border, then encode
+```
 
-## Installation on AWS Lambda
+The Worker does not rely on Cloudflare's `fit` heuristics. `geometry.ts` reproduces the arithmetic of Tachyon's Sharp pipeline, including `withoutEnlargement` rounding, JPEG shrink-on-load, EXIF rotation, `zoom` and the `px` Release Quirks. It then sends the binding explicit pixel operations ([ADR 0007](docs/adr/0007-process-with-the-cloudflare-images-binding.md)). A test oracle runs Tachyon v3.0.8's own code to check that the dimensions match ([ADR 0011](docs/adr/0011-geometry-oracle-and-remote-smoke-tests.md)).
 
-We require using Tachyon on [AWS Lambda](https://aws.amazon.com/lambda/details/) to offload image processing task in a serverless configuration. This ensures you don't need lots of hardware to handle thousands of image resize requests, and can scale essentially infinitely. One Tachyon stack is required per S3 bucket, so we recommend using a common region bucket for all sites, which then only requires a single Tachyon stack per region.
+Decisions are recorded in [docs/adr](docs/adr). The project language is in [GLOSSARY.md](GLOSSARY.md).
 
-Tachyon requires the following Lambda Function spec:
+## Deploy
 
-- Runtime: Node JS 18
-- Function URL activated
-- Env vars:
-  - S3_BUCKET=my-bucket
-  - S3_REGION=my-bucket-region
-  - S3_ENDPOINT=http://my-custom-endpoint (optional)
-  - S3_FORCE_PATH_STYLE=1 (optional)
+You need a Cloudflare account with Images enabled; the binding is billed per unique transformation. You also need Node 24.
 
-Take the `lambda.zip` from the latest release and upload it to your function.
+```sh
+npm ci
+npx wrangler login
+npx wrangler r2 bucket create tachyon-uploads   # or change bucket_name in wrangler.jsonc
+npx wrangler deploy
+```
 
-For routing web traffic to the Lambda function, we recommend using [Lambda Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html). These should be configured as:
+Then copy your uploads into the bucket so that the Object Keys match the path after the Worker host. For example, `uploads/2026/11/photo.jpg` is served at `https://<worker>/uploads/2026/11/photo.jpg`. [rclone](https://developers.cloudflare.com/r2/examples/rclone/) and R2 [Super Slurper](https://developers.cloudflare.com/r2/data-migration/super-slurper/) can copy an existing S3 bucket.
 
-- Auth type: None
-- Invoke mode: `RESPONSE_STREAM`
+### Configuration
 
-Alternatively, you can use API Gateway; this should be set to route all GET requests (i.e. `/{proxy+}`) to invoke your Tachyon Lambda function.
+Set these variables in [wrangler.jsonc](wrangler.jsonc):
 
-We also recommend running an aggressive caching proxy/CDN in front of Tachyon, such as CloudFront. (An expiration time of 1 year is typical for a production configuration.)
+| Variable | Purpose |
+|---|---|
+| `TACHYON_ORIGIN` | `r2` (default) reads from the `BUCKET` binding. `http` fetches from `TACHYON_HTTP_ORIGIN`. |
+| `TACHYON_HTTP_ORIGIN` | Base URL for the HTTP Origin, e.g. `https://example.com/wp-content/`. Upstream 403 and 404 become 404; other failures become 502. |
+| `TACHYON_KEY_PREFIX` | Prepended to every Object Key before the Origin lookup. |
+| `TACHYON_PRIVATE_PREFIXES` | Comma-separated Object Key prefixes that require a valid presign, e.g. `uploads/private/`. |
+| `TACHYON_SIGNING_ACCESS_KEY_ID` | The access key ID WordPress signs private URLs with. |
+| `TACHYON_SIGNING_HOST` | Host in the presigned URL, e.g. `<account>.r2.cloudflarestorage.com` or `bucket.s3.eu-west-1.amazonaws.com`. |
+| `TACHYON_SIGNING_PATH_PREFIX` | Path before the key in the presigned URL, e.g. `/bucket` for path-style URLs. Leave it empty for virtual-hosted URLs. |
 
-## Documentation
+The matching secret is set with `npx wrangler secret put TACHYON_SIGNING_SECRET_ACCESS_KEY`. For local development, copy [.dev.vars.example](.dev.vars.example) to `.dev.vars`.
 
-* [Plugin Setup](./docs/plugin.md)
-* [Using Tachyon](./docs/using.md)
-* [Hints and Tips](./docs/tips.md)
+Private prefixes fail closed. If signing credentials are missing, every private request returns 404 and the Worker logs a configuration error ([ADR 0009](docs/adr/0009-verify-presigns-for-private-prefixes.md)).
 
+### WordPress
 
-## Credits
+Install the [Tachyon plugin](https://github.com/humanmade/tachyon-plugin) and point it at the Worker:
 
-Created by Human Made for high volume and large-scale sites. We run Tachyon on sites with millions of monthly page views, and thousands of sites.
+```php
+define( 'TACHYON_URL', 'https://tachyon-edge.<subdomain>.workers.dev/uploads' );
+define( 'TACHYON_SERVER_VERSION', '3.0.0' ); // presigned private images use `presign=`
+```
 
-Written and maintained by [Joe Hoyle](https://github.com/joehoyle).
+To serve WebP to browsers that accept it, add a Transform Rule or another Worker in front that sets `X-WebP: 1` when `Accept` contains `image/webp`. The Worker caches WebP and non-WebP Variants separately.
 
-Tachyon is inspired by Photon by Automattic. As Tachyon is not an all-purpose image resizer, rather it uses a media library in Amazon S3, it has a different use case to [Photon](https://jetpack.com/support/photon/).
+## Differences from Tachyon v3.0.8
 
-Tachyon uses the [Sharp](https://github.com/lovell/sharp) (Used under the license Apache License 2.0) Node.js library for the resizing operations, which in turn uses the great libvips library.
+These are listed in [ADR 0006](docs/adr/0006-compatibility-target-is-the-wordpress-plugin.md):
 
-Interested in joining in on the fun? [Join us, and become human!](https://hmn.md/is/hiring/)
+- **Images:** Variants have the same dimensions, but the pixels and file sizes are not byte-identical. EXIF and ICC metadata are stripped, except copyright. PNGs are truecolor rather than palette, so they are larger.
+- **Animation:** percentage crops and `entropy`/`attention` on animated images return an image instead of Tachyon's error.
+- **`zoom`:** a fractional zoomed size is rounded instead of causing an error.
+- **AVIF:** output is labelled `image/avif`, not `image/heif`. AVIF Originals need an Enterprise plan, and AVIF output is capped at 1,200 px.
+- **Size limits:** Originals over 20 MB are served unmodified. Animations over 50 megapixels are returned untransformed.
 
+## Development
 
-## Looking for a different Tachyon?
+```sh
+npm test              # geometry oracle, plugin contract, SigV4 and Worker tests
+npm run lint
+npm run check:worker  # type-check against @cloudflare/workers-types
+npx wrangler deploy --dry-run
+```
 
-Tachyon by Human Made provides image resizing services for the web, and is specifically designed for WordPress. "Tachyon" is named after the [hypothetical faster-than-light particle](https://en.wikipedia.org/wiki/Tachyon).
+Sharp is a dev dependency only. It runs the Tachyon v3.0.8 oracle ([tests/oracle](tests/oracle)) and backs the fake Images binding ([tests/helpers/fake-images.ts](tests/helpers/fake-images.ts)). The `wrangler dev` Images simulation is low-fidelity. Before production traffic, run the remote smoke test against a deployed Worker ([ADR 0011](docs/adr/0011-geometry-oracle-and-remote-smoke-tests.md)). Deploy with `TACHYON_PRIVATE_PREFIXES=uploads/private/` and no signing credentials, then:
 
-Other software named Tachyon include:
+```sh
+node tests/remote/prepare.mjs /tmp/tachyon-smoke tachyon-uploads
+TACHYON_SMOKE_URL=https://<worker>/uploads/ TACHYON_SMOKE_FIXTURES=/tmp/tachyon-smoke npm run test:remote
+```
 
-* [Tachyon by VYV](https://tachyon.video/) - Video playback and media server.
-* [Tachyon by Cinnafilm](https://cinnafilm.com/product/tachyon/) - Video processing for the cinema industry.
-* [TACHYONS](https://tachyons.io/) - CSS framework.
+## API reference
+
+See [docs/using.md](docs/using.md).

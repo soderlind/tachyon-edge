@@ -1,0 +1,34 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tachyon-edge",
+	"main": "src/worker.ts",
+	"compatibility_date": "2026-11-04",
+	"workers_dev": true,
+	"observability": {
+		"enabled": true,
+		"redact_query_string": true
+	},
+	// Image processing (ADR 0007).
+	"images": {
+		"binding": "IMAGES"
+	},
+	// Originals (ADR 0008). Create the bucket with `wrangler r2 bucket create tachyon-uploads`.
+	"r2_buckets": [
+		{
+			"binding": "BUCKET",
+			"bucket_name": "tachyon-uploads"
+		}
+	],
+	"vars": {
+		// "r2" (BUCKET binding) or "http" (TACHYON_HTTP_ORIGIN).
+		"TACHYON_ORIGIN": "r2",
+		"TACHYON_HTTP_ORIGIN": "",
+		"TACHYON_KEY_PREFIX": "",
+		// Comma-separated Object Key prefixes that require a verified presign (ADR 0009).
+		"TACHYON_PRIVATE_PREFIXES": "",
+		"TACHYON_SIGNING_ACCESS_KEY_ID": "",
+		"TACHYON_SIGNING_HOST": "",
+		"TACHYON_SIGNING_PATH_PREFIX": ""
+		// TACHYON_SIGNING_SECRET_ACCESS_KEY is a secret: `wrangler secret put TACHYON_SIGNING_SECRET_ACCESS_KEY`.
+	}
+}

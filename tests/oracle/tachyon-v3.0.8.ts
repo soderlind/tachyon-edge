@@ -1,4 +1,7 @@
-import { S3Client, S3ClientConfig, GetObjectCommand, GetObjectCommandOutput } from '@aws-sdk/client-s3';
+/**
+ * Test oracle: the image-processing path of Tachyon v3.0.8 (commit 6308671),
+ * copied unchanged apart from removing the S3 client. Dev-only; never deployed.
+ */
 import sharp from 'sharp';
 import smartcrop from 'smartcrop-sharp';
 
@@ -24,10 +27,10 @@ export interface Args {
 	'X-Amz-Signature'?: string;
 	'X-Amz-Date'?: string;
 	'X-Amz-Security-Token'?: string;
+	'x-amz-checksum-mode'?: string;
+	'x-id'?: string;
 	referer?: string;
 }
-
-export type Config = S3ClientConfig & { bucket: string };
 
 /**
  * Get the dimensions from a string or array of strings.
@@ -44,67 +47,6 @@ function clamp( val: number | string, min: number, max: number ): number {
 	return Math.min( Math.max( Number( val ), min ), max );
 }
 
-/**
- * Get a file from S3/
- */
-export async function getS3File( config: Config, key: string, args: Args ): Promise<GetObjectCommandOutput> {
-	const s3 = new S3Client( {
-		...config,
-		signer: {
-			/**
-			 *
-			 * @param request
-			 */
-			sign: async request => {
-				if ( ! args['X-Amz-Algorithm'] ) {
-					// Add referer to the request headers on non-presigned URLs
-					// Presigned URLs works without the referer header
-					if (args.referer) {
-						request.headers = request.headers || {};
-						request.headers['referer'] = args.referer;
-					}
-					return request;
-				}
-				const presignedParamNames = [
-					'X-Amz-Algorithm',
-					'X-Amz-Content-Sha256',
-					'X-Amz-Credential',
-					'X-Amz-SignedHeaders',
-					'X-Amz-Expires',
-					'X-Amz-Signature',
-					'X-Amz-Date',
-					'X-Amz-Security-Token',
-				] as const;
-				const presignedParams: { [K in ( typeof presignedParamNames )[number]]?: string } = {}; // eslint-disable-line no-unused-vars
-				const signedHeaders = ( args['X-Amz-SignedHeaders']?.split( ';' ) || [] ).map( header => header.toLowerCase().trim() );
-
-				for ( const paramName of presignedParamNames ) {
-					if ( args[paramName] ) {
-						presignedParams[paramName] = args[paramName];
-					}
-				}
-
-				const headers: typeof request.headers = {};
-				for ( const header in request.headers ) {
-					if ( signedHeaders.includes( header.toLowerCase() ) ) {
-						headers[header] = request.headers[header];
-					}
-				}
-				request.query = presignedParams;
-
-				request.headers = headers;
-				return request;
-			},
-		},
-	} );
-
-	const command = new GetObjectCommand( {
-		Bucket: config.bucket,
-		Key: key,
-	} );
-
-	return s3.send( command );
-}
 /**
  * Apply a logarithmic compression to a value based on a zoom level.
  * return a default compression value based on a logarithmic scale

@@ -1,0 +1,4 @@
+# Local secrets for `wrangler dev`. Copy to .dev.vars (git-ignored).
+# Production: `wrangler secret put TACHYON_SIGNING_SECRET_ACCESS_KEY`.
+# Same secret access key WordPress uses to presign private uploads (ADR 0009).
+TACHYON_SIGNING_SECRET_ACCESS_KEY=replace-with-r2-or-s3-secret-access-key
