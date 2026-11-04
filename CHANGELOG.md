@@ -49,4 +49,4 @@ See ADR 0006 for the full list.
 - Percentage crops and `entropy`/`attention` on animated images return an image instead of an error.
 - Fractional zoomed sizes are rounded instead of raising an error.
 
-[0.1.0]: https://github.com/soderlind/tachyon-edge/releases/tag/v0.1.0
+[0.1.0]: https://github.com/soderlind/tachyon-edge/releases/tag/0.1.0
