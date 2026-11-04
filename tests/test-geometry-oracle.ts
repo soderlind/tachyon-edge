@@ -146,6 +146,23 @@ beforeAll( async () => {
 			bytes: await base.clone().withMetadata( { orientation } ).jpeg().toBuffer(),
 		} );
 	}
+	// EXIF orientation in PNG eXIf and extended WebP EXIF chunks (the WebP chunk follows the bitstream).
+	const wide = await sharp( {
+		create: {
+			width: 400,
+			height: 200,
+			channels: 3,
+			background: '#663399',
+		},
+	} ).png().toBuffer();
+	fixtures.push( {
+		name: 'exif-6.png',
+		bytes: await sharp( wide ).withMetadata( { orientation: 6 } ).png().toBuffer(),
+	} );
+	fixtures.push( {
+		name: 'exif-6.webp',
+		bytes: await sharp( wide ).withMetadata( { orientation: 6 } ).webp().toBuffer(),
+	} );
 	fixtures.push( {
 		name: 'small.png',
 		bytes: await sharp( {
@@ -182,7 +199,7 @@ beforeAll( async () => {
 } );
 
 describe( 'planner matches Tachyon v3.0.8 geometry', () => {
-	const cases = [ 'briefing-copywriting.jpg', 'hdr.jpg', 'Website.png', 'humans.png', 'icons.png', 'animated.gif', 'animated.webp', 'exif-3.jpg', 'exif-6.jpg', 'exif-8.jpg', 'small.png', 'odd.jpg', 'small.webp' ]
+	const cases = [ 'briefing-copywriting.jpg', 'hdr.jpg', 'Website.png', 'humans.png', 'icons.png', 'animated.gif', 'animated.webp', 'exif-3.jpg', 'exif-6.jpg', 'exif-8.jpg', 'exif-6.png', 'exif-6.webp', 'small.png', 'odd.jpg', 'small.webp' ]
 		.flatMap( name => ARG_SETS.map( args => [ name, args ] as const ) );
 
 	test.each( cases )( '%s %j', async ( name, rawArgs ) => {

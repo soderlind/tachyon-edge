@@ -10,10 +10,10 @@ The cache key contains:
 
 - the full request URL;
 - the effective WebP selection, from `webp` or `X-WebP`;
-- the Origin identity; and
+- the Origin identity: the Origin type, `TACHYON_R2_BUCKET` or `TACHYON_HTTP_ORIGIN`, and `TACHYON_KEY_PREFIX`; and
 - the Processing Version.
 
-Signed requests, requests for private prefixes, errors, and non-GET requests bypass the cache. Cache hits receive a fresh `Last-Modified`, as Tachyon generates one for each response.
+Signed requests, requests whose storage key is under a private prefix, errors, and non-GET requests bypass the cache. Cache hits receive a fresh `Last-Modified`, as Tachyon generates one for each response.
 
 Workers Cache (`"cache": {"enabled": true}`) was rejected. It keys only on the path and query, so a WebP Variant generated for an `X-WebP` request would be served to clients that did not request WebP. That would break the Plugin Contract.
 

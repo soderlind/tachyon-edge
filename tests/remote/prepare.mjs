@@ -26,6 +26,20 @@ writeFileSync( join( dir, 'marker.jpg' ), marker );
 // Stored rotated -90° with orientation 6, so it displays exactly like marker.jpg.
 const stored = await sharp( marker ).rotate( -90 ).jpeg( { quality: 95 } ).toBuffer();
 writeFileSync( join( dir, 'marker-o6.jpg' ), await sharp( stored ).withMetadata( { orientation: 6 } ).jpeg( { quality: 95 } ).toBuffer() );
+// The same orientation-6 marker in a PNG eXIf chunk and an extended WebP EXIF chunk.
+writeFileSync( join( dir, 'marker-o6.png' ), await sharp( stored ).withMetadata( { orientation: 6 } ).png().toBuffer() );
+writeFileSync( join( dir, 'marker-o6.webp' ), await sharp( stored ).withMetadata( { orientation: 6 } ).webp( { lossless: true } ).toBuffer() );
+// Four coloured quadrants for every EXIF orientation, so rotation direction and flips are visible.
+const quadrants = await sharp( { create: { width: 200, height: 100, channels: 3, background: '#000000' } } )
+	.composite( [ [ '#ff0000', 0, 0 ], [ '#00ff00', 100, 0 ], [ '#0000ff', 0, 50 ], [ '#ffff00', 100, 50 ] ]
+		.map( ( [ background, left, top ] ) => ( { input: { create: { width: 100, height: 50, channels: 3, background } }, left, top } ) ) )
+	.png()
+	.toBuffer();
+for ( const orientation of [ 2, 3, 4, 5, 6, 7, 8 ] ) {
+	const tagged = sharp( quadrants ).withMetadata( { orientation } );
+	writeFileSync( join( dir, `quadrants-o${ orientation }.png` ), await tagged.clone().png().toBuffer() );
+	writeFileSync( join( dir, `quadrants-o${ orientation }.webp` ), await tagged.clone().webp( { lossless: true } ).toBuffer() );
+}
 writeFileSync( join( dir, 'photo.avif' ), await sharp( join( images, 'hdr.jpg' ) ).resize( 600 ).avif().toBuffer() );
 
 const upload = ( file, key ) => execFileSync( 'npx', [ 'wrangler', 'r2', 'object', 'put', `${ bucket }/${ key }`, '--file', join( dir, file ), '--remote' ], { stdio: 'inherit' } );

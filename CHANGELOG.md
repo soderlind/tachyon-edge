@@ -9,19 +9,20 @@ First release of Tachyon Edge: a rewrite of [Human Made Tachyon](https://github.
 ### Added
 
 - A Cloudflare Worker (`src/worker.ts`) that processes images with the Cloudflare Images binding. It does not use Sharp, libvips, Containers or Lambda in production (ADR 0007).
-- A geometry planner (`src/geometry.ts`) that reproduces Tachyon's Sharp output sizes. It covers `withoutEnlargement` rounding, JPEG shrink-on-load, EXIF orientation, `zoom` and the `px` Release Quirks, and sends the binding explicit `trim`, `squeeze`, `cover` and `border` operations.
+- A geometry planner (`src/geometry.ts`) that reproduces Tachyon's Sharp output sizes. It covers `withoutEnlargement` rounding, JPEG shrink-on-load, EXIF orientation (JPEG, PNG `eXIf` and WebP `EXIF`; explicit `rotate`/`flip` for PNG and WebP, which the binding does not auto-orient), `zoom` and the `px` Release Quirks, and sends the binding explicit `trim`, `squeeze`, `cover` and `border` operations.
 - Parsing of the plugin URL contract (`src/contract.ts`): `w`, `h`, `fit`, `resize`, `gravity`, `crop`, `crop_strategy`, `quality`, `zoom`, `webp`, `lb` and `background`. Repeated parameters are joined with commas. The `X-WebP` header is supported.
 - Two Origins (ADR 0008):
   - the R2 binding (`BUCKET`);
   - an HTTP base URL (`TACHYON_HTTP_ORIGIN`), with protection against dot segments.
-- `TACHYON_KEY_PREFIX` for buckets that store uploads under a prefix.
-- Private prefixes (`TACHYON_PRIVATE_PREFIXES`) that require an AWS SigV4 presign verified in the Worker. Both the `presign=` and the raw `X-Amz-*` forms are accepted, and private requests fail closed when signing credentials are missing (ADR 0009).
-- Cache API storage for unsigned public Variants. The cache key includes the WebP choice, the Origin identity and `PROCESSING_VERSION` (ADR 0010).
-- Tests (686 in total, run by `npm test`):
-  - a geometry oracle that runs Tachyon v3.0.8's own Sharp pipeline (606 cases, including EXIF rotation, animation and a seeded random-size sweep);
+- `TACHYON_KEY_PREFIX` for buckets that store uploads under a prefix, and `TACHYON_R2_BUCKET` to name the bound bucket in the cache key.
+- Private prefixes (`TACHYON_PRIVATE_PREFIXES`, matched against the storage key including `TACHYON_KEY_PREFIX`) that require an AWS SigV4 presign verified in the Worker. Both the `presign=` and the raw `X-Amz-*` forms are accepted, and private requests fail closed when signing credentials are missing (ADR 0009).
+- Cache API storage for unsigned public Variants. The cache key includes the WebP choice, the Origin identity (including the R2 bucket) and `PROCESSING_VERSION` (ADR 0010).
+- Originals without `Content-Length` are buffered only up to the 20 MB binding limit; larger ones stream through unmodified.
+- Tests (788 in total, run by `npm test`):
+  - a geometry oracle that runs Tachyon v3.0.8's own Sharp pipeline (690 cases, including JPEG, PNG and WebP EXIF rotation, animation and a seeded random-size sweep);
   - plugin contract and SigV4 tests;
   - Worker end-to-end tests against a Sharp-backed fake Images binding.
-- A remote smoke suite against a deployed Worker (`npm run test:remote`, fixtures from `tests/remote/prepare.mjs`). The first deployment passed all 90 checks (ADR 0011).
+- A remote smoke suite against a deployed Worker (`npm run test:remote`, fixtures from `tests/remote/prepare.mjs`). The current deployment passes all 132 checks, including AVIF and every PNG/WebP EXIF orientation; `TACHYON_SMOKE_SKIP_AVIF=1` skips AVIF on accounts without support (ADR 0011).
 - ADRs 0006–0011, `GLOSSARY.md` and `.dev.vars.example`.
 
 ### Changed

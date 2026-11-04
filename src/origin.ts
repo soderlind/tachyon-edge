@@ -6,6 +6,7 @@ import type { Bucket } from './bindings.js';
 export interface OriginEnv {
 	TACHYON_ORIGIN?: string;
 	BUCKET?: Bucket;
+	TACHYON_R2_BUCKET?: string;
 	TACHYON_HTTP_ORIGIN?: string;
 	TACHYON_KEY_PREFIX?: string;
 }
@@ -15,10 +16,16 @@ export type Original =
 	| { status: 'not-found' }
 	| { status: 'error'; reason: string };
 
-/** Stable identity of the configured Origin, for cache keys. */
+/** Stable identity of the configured Origin, for cache keys. The R2 binding cannot report its bucket, so `TACHYON_R2_BUCKET` names it. */
 export function originIdentity( env: OriginEnv ): string {
 	const kind = env.TACHYON_ORIGIN || 'r2';
-	return JSON.stringify( [ kind, kind === 'http' ? env.TACHYON_HTTP_ORIGIN : null, env.TACHYON_KEY_PREFIX || '' ] );
+	const location = kind === 'http' ? env.TACHYON_HTTP_ORIGIN : env.TACHYON_R2_BUCKET || '';
+	return JSON.stringify( [ kind, location, env.TACHYON_KEY_PREFIX || '' ] );
+}
+
+/** The key read from storage: `TACHYON_KEY_PREFIX` followed by the Object Key. */
+export function storageKey( env: OriginEnv, key: string ): string {
+	return ( env.TACHYON_KEY_PREFIX || '' ) + key;
 }
 
 /** Build the HTTP Origin URL for an Object Key without allowing it to escape the base path. */
@@ -32,7 +39,7 @@ export function httpOriginUrl( base: string, key: string ): string | undefined {
 
 /** Fetch an Original by its Object Key. */
 export async function fetchOriginal( env: OriginEnv, key: string ): Promise<Original> {
-	const storageKey = ( env.TACHYON_KEY_PREFIX || '' ) + key;
+	const stored = storageKey( env, key );
 	const kind = env.TACHYON_ORIGIN || 'r2';
 
 	if ( kind === 'r2' ) {
@@ -42,11 +49,11 @@ export async function fetchOriginal( env: OriginEnv, key: string ): Promise<Orig
 				reason: 'R2 origin selected but BUCKET is not bound',
 			};
 		}
-		if ( ! storageKey ) {
+		if ( ! stored ) {
 			return { status: 'not-found' };
 		}
 		try {
-			const object = await env.BUCKET.get( storageKey );
+			const object = await env.BUCKET.get( stored );
 			return object ? {
 				status: 'found',
 				body: object.body,
@@ -67,7 +74,7 @@ export async function fetchOriginal( env: OriginEnv, key: string ): Promise<Orig
 				reason: 'HTTP origin selected but TACHYON_HTTP_ORIGIN is not set',
 			};
 		}
-		const url = httpOriginUrl( env.TACHYON_HTTP_ORIGIN, storageKey );
+		const url = httpOriginUrl( env.TACHYON_HTTP_ORIGIN, stored );
 		if ( ! url ) {
 			return { status: 'not-found' };
 		}

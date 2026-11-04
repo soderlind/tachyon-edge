@@ -44,8 +44,9 @@ Set these variables in [wrangler.jsonc](wrangler.jsonc):
 |---|---|
 | `TACHYON_ORIGIN` | `r2` (default) reads from the `BUCKET` binding. `http` fetches from `TACHYON_HTTP_ORIGIN`. |
 | `TACHYON_HTTP_ORIGIN` | Base URL for the HTTP Origin, e.g. `https://example.com/wp-content/`. Upstream 403 and 404 become 404; other failures become 502. |
+| `TACHYON_R2_BUCKET` | Name of the bucket bound as `BUCKET`. Keep it equal to `bucket_name`; it separates cached Variants when the binding points at another bucket. |
 | `TACHYON_KEY_PREFIX` | Prepended to every Object Key before the Origin lookup. |
-| `TACHYON_PRIVATE_PREFIXES` | Comma-separated Object Key prefixes that require a valid presign, e.g. `uploads/private/`. |
+| `TACHYON_PRIVATE_PREFIXES` | Comma-separated storage key prefixes (`TACHYON_KEY_PREFIX` + Object Key) that require a valid presign, e.g. `uploads/private/`. |
 | `TACHYON_SIGNING_ACCESS_KEY_ID` | The access key ID WordPress signs private URLs with. |
 | `TACHYON_SIGNING_HOST` | Host in the presigned URL, e.g. `<account>.r2.cloudflarestorage.com` or `bucket.s3.eu-west-1.amazonaws.com`. |
 | `TACHYON_SIGNING_PATH_PREFIX` | Path before the key in the presigned URL, e.g. `/bucket` for path-style URLs. Leave it empty for virtual-hosted URLs. |

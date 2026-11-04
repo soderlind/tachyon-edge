@@ -23,8 +23,10 @@
 		// "r2" (BUCKET binding) or "http" (TACHYON_HTTP_ORIGIN).
 		"TACHYON_ORIGIN": "r2",
 		"TACHYON_HTTP_ORIGIN": "",
+		// Keep equal to r2_buckets[0].bucket_name: it separates cached Variants per bucket.
+		"TACHYON_R2_BUCKET": "tachyon-uploads",
 		"TACHYON_KEY_PREFIX": "",
-		// Comma-separated Object Key prefixes that require a verified presign (ADR 0009).
+		// Comma-separated storage key prefixes (TACHYON_KEY_PREFIX + Object Key) that require a verified presign (ADR 0009).
 		"TACHYON_PRIVATE_PREFIXES": "",
 		"TACHYON_SIGNING_ACCESS_KEY_ID": "",
 		"TACHYON_SIGNING_HOST": "",

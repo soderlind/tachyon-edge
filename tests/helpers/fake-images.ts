@@ -27,6 +27,12 @@ async function apply( input: Buffer, step: Transform ): Promise<Buffer> {
 	const meta = await image.metadata();
 	const width = meta.width!;
 	const height = meta.pageHeight || meta.height!;
+	if ( step.rotate ) {
+		return image.rotate( step.rotate ).toBuffer();
+	}
+	if ( step.flip ) {
+		return ( step.flip === 'h' ? image.flop() : image.flip() ).toBuffer();
+	}
 	if ( step.trim ) {
 		const { top, right, bottom, left } = step.trim;
 		return image.extract( {
@@ -125,8 +131,10 @@ export function fakeImages(): FakeImages {
 					if ( options.anim && options.format !== 'image/gif' && options.format !== 'image/webp' ) {
 						throw Object.assign( new Error( 'IMAGES_TRANSFORM_ERROR 9401: Animated output is only supported for GIF or WebP' ), { code: 9401 } );
 					}
-					// The binding applies EXIF orientation automatically.
-					let data = await sharp( await read( stream ), { animated: true } ).rotate().toBuffer();
+					// The binding applies EXIF orientation automatically for JPEG only (verified remotely).
+					const input = sharp( await read( stream ), { animated: true } );
+					const { format } = await input.metadata();
+					let data = await ( format === 'jpeg' ? input.rotate() : input ).toBuffer();
 					for ( const step of transforms ) {
 						data = await apply( data, step );
 					}

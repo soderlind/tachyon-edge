@@ -6,7 +6,7 @@ Supersedes: ADR 0003 (signed-only part)
 
 ADR 0003 made every R2 read require a signature. That broke the plugin, because the plugin requests public attachments without signatures. Public Originals are now served unsigned.
 
-R2 has no per-object ACLs, so S3 Uploads' private ACL cannot be enforced by the Origin. Instead, every Object Key under a configured private prefix (`TACHYON_PRIVATE_PREFIXES`, comma-separated) requires a valid AWS Signature Version 4 query presign. The Worker verifies it with the same S3 access key that WordPress uses to sign:
+R2 has no per-object ACLs, so S3 Uploads' private ACL cannot be enforced by the Origin. Instead, every storage key (`TACHYON_KEY_PREFIX` + Object Key, ADR 0008) under a configured private prefix (`TACHYON_PRIVATE_PREFIXES`, comma-separated) requires a valid AWS Signature Version 4 query presign. The Worker verifies it with the same S3 access key that WordPress uses to sign:
 
 - **Credentials:** `TACHYON_SIGNING_ACCESS_KEY_ID` is a variable and `TACHYON_SIGNING_SECRET_ACCESS_KEY` is a secret.
 - **Canonical request:** it is rebuilt from the signing endpoint host and addressing style (`TACHYON_SIGNING_HOST` and `TACHYON_SIGNING_PATH_PREFIX`), the Object Key, and the `X-Amz-*` parameters. They may come from `presign` or arrive as raw query parameters.

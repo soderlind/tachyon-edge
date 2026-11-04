@@ -127,6 +127,57 @@ describe( 'image responses match Tachyon v3.0.8 dimensions and formats', () => {
 	} );
 } );
 
+describe( 'EXIF orientation in PNG and WebP Originals', () => {
+	/**
+	 *
+	 */
+	const quadrants = async () => sharp( {
+		create: {
+			width: 200,
+			height: 100,
+			channels: 3,
+			background: '#000000',
+		},
+	} ).composite( [
+		[ '#ff0000', 0, 0 ],
+		[ '#00ff00', 100, 0 ],
+		[ '#0000ff', 0, 50 ],
+		[ '#ffff00', 100, 50 ],
+	].map( ( [ background, left, top ] ) => ( {
+		input: {
+			create: {
+				width: 100,
+				height: 50,
+				channels: 3 as const,
+				background: background as string,
+			},
+		},
+		left: left as number,
+		top: top as number,
+	} ) ) ).png().toBuffer();
+
+	/** Colour names at the centre of each display quadrant. */
+	async function corners( bytes: Buffer ) {
+		const { data, info } = await sharp( bytes ).raw().toBuffer( { resolveWithObject: true } );
+		return [ [ 0.25, 0.25 ], [ 0.75, 0.25 ], [ 0.25, 0.75 ], [ 0.75, 0.75 ] ].map( ( [ x, y ] ) => {
+			const i = ( Math.floor( y * info.height ) * info.width + Math.floor( x * info.width ) ) * info.channels;
+			return [ data[i], data[i + 1], data[i + 2] ].map( v => v > 127 ? 1 : 0 ).join( '' );
+		} );
+	}
+
+	test.each( [ 'png', 'webp' ].flatMap( format => [ 2, 3, 4, 5, 6, 7, 8 ].map( orientation => [ format, orientation ] as const ) ) )( '%s orientation %i is displayed like Tachyon', async ( format, orientation ) => {
+		const tagged = sharp( await quadrants() ).withMetadata( { orientation } );
+		const bytes = await ( format === 'png' ? tagged.png() : tagged.webp( { lossless: true } ) ).toBuffer();
+		const key = `uploads/oriented-${ orientation }.${ format }`;
+		objects.set( key, bytes );
+		const { response, body } = await get( `/${ key }?w=80`, env() );
+		const { data } = await resizeBuffer( bytes, { w: '80' } as Args );
+		expect( response.status ).toBe( 200 );
+		expect( await size( body ) ).toEqual( await size( data ) );
+		expect( await corners( body ) ).toEqual( await corners( data ) );
+	} );
+} );
+
 describe( 'encoding', () => {
 	test( 'default quality, explicit quality and zoom compression reach the binding', async () => {
 		const environment = env();
@@ -229,6 +280,54 @@ describe( 'HTTP Origin', () => {
 		expect( body.toString() ).not.toContain( 'upstream detail' );
 	} );
 
+	test( 'Originals without Content-Length are read only up to the limit, then passed through', async () => {
+		const chunk = new Uint8Array( 1024 * 1024 ).fill( 7 );
+		const chunks = Math.ceil( MAX_INPUT_BYTES / chunk.byteLength ) + 4;
+		let pulled = 0;
+		const body = new ReadableStream<Uint8Array>( {
+			/**
+			 *
+			 */
+			pull( controller ) {
+				if ( pulled++ < chunks ) {
+					controller.enqueue( chunk );
+				} else {
+					controller.close();
+				}
+			},
+		}, { highWaterMark: 0 } );
+		jest.spyOn( globalThis, 'fetch' ).mockResolvedValue( new Response( body ) );
+		const environment = httpEnv();
+		const response = await handleRequest( new Request( 'https://cdn.example.test/uploads/huge.png?w=100' ), environment, { /**
+																																																																																																																									 *
+																																																																																																																									 */
+			waitUntil: () => {},
+		} );
+		expect( response.status ).toBe( 200 );
+		expect( response.headers.get( 'Content-Type' ) ).toBe( 'image/png' );
+		expect( pulled ).toBeLessThan( chunks );
+		expect( ( await response.arrayBuffer() ).byteLength ).toBe( chunks * chunk.byteLength );
+		expect( environment.IMAGES.calls ).toHaveLength( 0 );
+	} );
+
+	test( 'chunked Originals under the limit are transformed', async () => {
+		const bytes = objects.get( 'uploads/photo.jpg' )!;
+		const body = new ReadableStream<Uint8Array>( {
+			/**
+			 *
+			 */
+			start( controller ) {
+				controller.enqueue( bytes.subarray( 0, 1000 ) );
+				controller.enqueue( bytes.subarray( 1000 ) );
+				controller.close();
+			},
+		} );
+		jest.spyOn( globalThis, 'fetch' ).mockResolvedValue( new Response( body ) );
+		const { response, body: out } = await get( '/uploads/photo.jpg?w=50', httpEnv() );
+		expect( response.status ).toBe( 200 );
+		expect( ( await size( out ) )[0] ).toBe( 50 );
+	} );
+
 	test( 'dot segments cannot escape the base path', async () => {
 		const fetch = jest.spyOn( globalThis, 'fetch' ).mockResolvedValue( new Response( null, { status: 404 } ) );
 		await get( '/uploads/%2E%2E/%2E%2E/wp-config.php', httpEnv() );
@@ -285,6 +384,22 @@ describe( 'private prefixes and presigns', () => {
 
 	test( 'unsigned private requests are not found', async () => {
 		expect( ( await get( '/private/secret.jpg?w=50', env( signing ) ) ).response.status ).toBe( 404 );
+	} );
+
+	test( 'private prefixes match the storage key, including TACHYON_KEY_PREFIX', async () => {
+		const environment = env( {
+			...signing,
+			TACHYON_KEY_PREFIX: 'stored/',
+			TACHYON_PRIVATE_PREFIXES: 'stored/private/',
+		} );
+		objects.set( 'stored/private/secret.jpg', images( 'hdr.jpg' ) );
+		expect( ( await get( '/private/secret.jpg?w=50', environment ) ).response.status ).toBe( 404 );
+		expect( environment.BUCKET.get ).not.toHaveBeenCalled();
+
+		const url = await signedUrl( 'private/secret.jpg' );
+		at( 100 );
+		expect( ( await get( url, environment ) ).response.status ).toBe( 200 );
+		expect( environment.BUCKET.get ).toHaveBeenCalledWith( 'stored/private/secret.jpg' );
 	} );
 
 	test( 'private prefixes without signing credentials fail closed', async () => {
@@ -358,6 +473,15 @@ describe( 'cache', () => {
 		expect( hit.response.headers.get( 'Content-Type' ) ).toBe( 'image/webp' );
 		expect( hit.response.headers.get( 'Last-Modified' ) ).toBe( 'Thu, 05 Nov 2026 12:00:00 GMT' );
 		expect( environment.BUCKET.get ).toHaveBeenCalledTimes( 2 );
+	} );
+
+	test( 'Variants are cached separately per R2 bucket', async () => {
+		const { store } = installCache();
+		await get( '/uploads/photo.jpg?w=60', env( { TACHYON_R2_BUCKET: 'one' } ) );
+		const other = env( { TACHYON_R2_BUCKET: 'two' } );
+		await get( '/uploads/photo.jpg?w=60', other );
+		expect( store.size ).toBe( 2 );
+		expect( other.BUCKET.get ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	test( 'errors, private and signed requests are not cached', async () => {

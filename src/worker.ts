@@ -5,14 +5,15 @@
 /* eslint-disable no-console -- Workers Logs is the observability channel. */
 import type { Bucket, Context, Images } from './bindings.js';
 import { parseRequest, type TachyonRequest } from './contract.js';
-import { plan, PlanError, type Source } from './geometry.js';
-import { fetchOriginal, originIdentity } from './origin.js';
+import { orientationTransforms, plan, PlanError, type Source } from './geometry.js';
+import { fetchOriginal, originIdentity, storageKey } from './origin.js';
 import { probe, toSource } from './probe.js';
 import { secondsUntilExpiry, verifyPresign, type SigningConfig } from './sigv4.js';
 
 export interface Env {
 	IMAGES: Images;
 	BUCKET?: Bucket;
+	TACHYON_R2_BUCKET?: string;
 	TACHYON_ORIGIN?: string;
 	TACHYON_HTTP_ORIGIN?: string;
 	TACHYON_KEY_PREFIX?: string;
@@ -24,7 +25,7 @@ export interface Env {
 }
 
 /** Bump when output for an unchanged URL and Original changes, to invalidate cached Variants. */
-export const PROCESSING_VERSION = 'edge-images-1';
+export const PROCESSING_VERSION = 'edge-images-3';
 
 /** Cloudflare Images binding input limit; larger Originals are served unmodified. */
 export const MAX_INPUT_BYTES = 20 * 1024 * 1024;
@@ -74,14 +75,13 @@ function signingConfig( env: Env ): SigningConfig | undefined {
 	};
 }
 
-/**
- *
- */
+/** Private prefixes match the storage key, so they hold regardless of `TACHYON_KEY_PREFIX`. */
 function isPrivate( env: Env, key: string ): boolean {
+	const stored = storageKey( env, key );
 	return ( env.TACHYON_PRIVATE_PREFIXES || '' )
 		.split( ',' )
 		.map( prefix => prefix.trim() )
-		.some( prefix => prefix && key.startsWith( prefix ) );
+		.some( prefix => prefix && stored.startsWith( prefix ) );
 }
 
 /** Enforce presign expiry and verification (ADR 0009). Returns the max-age for the response. */
@@ -201,10 +201,10 @@ async function serve( request: Request, env: Env, context: Context ): Promise<Re
 	if ( original.size !== undefined && original.size > MAX_INPUT_BYTES ) {
 		response = passthrough( original.body, tachyon.key, headers );
 	} else {
-		const bytes = new Uint8Array( await new Response( original.body ).arrayBuffer() );
-		response = bytes.byteLength > MAX_INPUT_BYTES
-			? passthrough( bytesStream( bytes ), tachyon.key, headers )
-			: await transform( env, bytes, tachyon, headers );
+		const read = await readAtMost( original.body, MAX_INPUT_BYTES );
+		response = 'bytes' in read
+			? await transform( env, read.bytes, tachyon, headers )
+			: passthrough( read.stream, tachyon.key, headers );
 	}
 
 	if ( cache && key ) {
@@ -213,6 +213,61 @@ async function serve( request: Request, env: Env, context: Context ): Promise<Re
 		} ) );
 	}
 	return response;
+}
+
+/**
+ * Buffer a body of unknown length up to `limit` bytes. When it is larger, stop
+ * reading and return a stream of the buffered prefix followed by the remainder.
+ */
+async function readAtMost( body: ReadableStream<Uint8Array>, limit: number ): Promise<{ bytes: Uint8Array } | { stream: ReadableStream<Uint8Array> }> {
+	const reader = body.getReader();
+	const chunks: Uint8Array[] = [];
+	let total = 0;
+	for ( ;; ) {
+		const { done, value } = await reader.read();
+		if ( done ) {
+			break;
+		}
+		chunks.push( value );
+		total += value.byteLength;
+		if ( total > limit ) {
+			return {
+				stream: new ReadableStream<Uint8Array>( {
+					/**
+					 *
+					 */
+					start( controller ) {
+						chunks.forEach( chunk => controller.enqueue( chunk ) );
+						chunks.length = 0;
+					},
+					/**
+					 *
+					 */
+					async pull( controller ) {
+						const next = await reader.read();
+						if ( next.done ) {
+							controller.close();
+						} else {
+							controller.enqueue( next.value );
+						}
+					},
+					/**
+					 *
+					 */
+					cancel( reason ) {
+						return reader.cancel( reason );
+					},
+				} ),
+			};
+		}
+	}
+	const bytes = new Uint8Array( total );
+	let offset = 0;
+	for ( const chunk of chunks ) {
+		bytes.set( chunk, offset );
+		offset += chunk.byteLength;
+	}
+	return { bytes };
 }
 
 /** Serve an Original the Images binding cannot accept, unmodified (documented deviation). */
@@ -238,7 +293,7 @@ async function transform( env: Env, bytes: Uint8Array, tachyon: TachyonRequest, 
 	}
 
 	let transformer = env.IMAGES.input( bytesStream( bytes ) );
-	for ( const step of planned.transforms ) {
+	for ( const step of [ ...orientationTransforms( source ), ...planned.transforms ] ) {
 		transformer = transformer.transform( step );
 	}
 	let result;

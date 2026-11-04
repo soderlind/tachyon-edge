@@ -81,6 +81,46 @@ function probeJpeg( view: DataView ): Probe {
 	};
 }
 
+/** Read orientation from a raw TIFF block or one prefixed by the `Exif\0\0` APP1 header. */
+function exifOrientation( view: DataView, start: number, end: number ): number {
+	if ( start + 6 <= end && view.getUint32( start ) === 0x45786966 && view.getUint16( start + 4 ) === 0 ) {
+		start += 6;
+	}
+	return tiffOrientation( view, start, end );
+}
+
+/** Scan extended WebP chunks for EXIF orientation. */
+function webpOrientation( view: DataView, bytes: Uint8Array ): number {
+	let offset = 12;
+	while ( offset + 8 <= bytes.length ) {
+		const size = view.getUint32( offset + 4, true );
+		const data = offset + 8;
+		if ( String.fromCharCode( ...bytes.subarray( offset, offset + 4 ) ) === 'EXIF' ) {
+			return exifOrientation( view, data, Math.min( data + size, bytes.length ) );
+		}
+		offset = data + size + ( size & 1 );
+	}
+	return 1;
+}
+
+/** Scan PNG chunks before the image data for an `eXIf` orientation. */
+function pngOrientation( view: DataView, bytes: Uint8Array ): number {
+	let offset = 8;
+	while ( offset + 8 <= bytes.length ) {
+		const length = view.getUint32( offset );
+		const type = String.fromCharCode( ...bytes.subarray( offset + 4, offset + 8 ) );
+		const data = offset + 8;
+		if ( type === 'eXIf' ) {
+			return exifOrientation( view, data, Math.min( data + length, bytes.length ) );
+		}
+		if ( type === 'IDAT' || type === 'IEND' ) {
+			break;
+		}
+		offset = data + length + 4;
+	}
+	return 1;
+}
+
 /** Parse the first WebP chunk header. */
 function probeWebp( view: DataView, bytes: Uint8Array ): Probe {
 	const chunk = String.fromCharCode( ...bytes.subarray( 12, 16 ) );
@@ -110,7 +150,7 @@ function probeWebp( view: DataView, bytes: Uint8Array ): Probe {
 			format: 'webp',
 			width: read24( 24 ) + 1,
 			height: read24( 27 ) + 1,
-			orientation: 1,
+			orientation: bytes[20] & 0x08 ? webpOrientation( view, bytes ) : 1,
 		};
 	}
 	return {
@@ -134,7 +174,7 @@ export function probe( bytes: Uint8Array ): Probe | undefined {
 			format: 'png',
 			width: view.getUint32( 16 ),
 			height: view.getUint32( 20 ),
-			orientation: 1,
+			orientation: pngOrientation( view, bytes ),
 		};
 	}
 	if ( bytes.length >= 10 && ascii( 0, 4 ) === 'GIF8' ) {

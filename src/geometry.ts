@@ -31,6 +31,30 @@ export interface Transform {
 	gravity?: Gravity;
 	trim?: { top: number; right: number; bottom: number; left: number };
 	border?: { color: string; top: number; right: number; bottom: number; left: number };
+	/** Clockwise degrees. */
+	rotate?: 90 | 180 | 270;
+	flip?: 'h' | 'v';
+}
+
+/**
+ * Steps that turn stored pixels into display orientation. The Images binding
+ * applies EXIF orientation itself for JPEG only, so PNG `eXIf` and WebP `EXIF`
+ * orientation must be applied explicitly before the planned transforms.
+ */
+export function orientationTransforms( source: Source ): Transform[] {
+	if ( source.format !== 'png' && source.format !== 'webp' ) {
+		return [];
+	}
+	const steps: Record<number, Transform[]> = {
+		2: [ { flip: 'h' } ],
+		3: [ { rotate: 180 } ],
+		4: [ { flip: 'v' } ],
+		5: [ { rotate: 90 }, { flip: 'h' } ],
+		6: [ { rotate: 90 } ],
+		7: [ { rotate: 270 }, { flip: 'h' } ],
+		8: [ { rotate: 270 } ],
+	};
+	return steps[source.orientation] || [];
 }
 
 export type OutputFormat = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' | 'image/avif';

@@ -24,6 +24,11 @@ Golden image bytes are no longer the gate. Verification has three layers:
 - [x] Missing, private-unsigned, invalid-crop and `X-WebP` cases return the contract statuses and headers.
 - [ ] ~~PNG with an explicit quality is palette-encoded.~~ It is not: the binding ignores PNG quality and writes truecolor. This is now a deviation (ADR 0006).
 
+A second run (2026-11-04, 132 of 132 checks passing) added EXIF-oriented PNG and WebP Originals and AVIF assertions:
+
+- [x] The binding does not apply orientation stored in PNG `eXIf` or WebP `EXIF` chunks. The Worker's explicit `rotate` (clockwise) and `flip` operations reproduce Tachyon's display for all eight orientations, and `trim` then works in display coordinates.
+- [x] AVIF Originals resized to `w=300` return 200, `image/avif` and width 300. Set `TACHYON_SMOKE_SKIP_AVIF=1` on accounts without AVIF support.
+
 The first deployment also found that the binding rejects `anim: true` for JPEG and PNG output with error 9401 ("Animated output is only supported for GIF or WebP"). The fake binding now enforces the same rule.
 
 Unexpected errors are logged without query strings or secrets and return a sanitized 500. Origin failures return 502.
