@@ -1,0 +1,761 @@
+{
+	"schemaVersion": "0.3.0",
+	"kind": "graph",
+	"title": "Tachyon Edge architecture",
+	"summary": "Current state at release 0.1.1: one Cloudflare Worker serves Tachyon plugin URLs, reads Originals from R2 or HTTP, computes Tachyon v3.0.8 geometry, and encodes Variants with the Images binding.",
+	"lenses": [
+		"architecture",
+		"data-flow"
+	],
+	"provenance": {
+		"repo": {
+			"owner": "soderlind",
+			"name": "tachyon-edge",
+			"host": "github.com"
+		},
+		"base": {
+			"sha": "f1554d420876b43a057797ccf78d3dba33cbfb08",
+			"ref": "main"
+		},
+		"head": {
+			"sha": "f1554d420876b43a057797ccf78d3dba33cbfb08",
+			"ref": "main"
+		},
+		"generator": {
+			"name": "illustrate-design",
+			"version": "1.0.0"
+		}
+	},
+	"lanes": [
+		{
+			"id": "wordpress",
+			"label": "WordPress",
+			"subtitle": "tachyon-plugin",
+			"order": 0
+		},
+		{
+			"id": "worker",
+			"label": "Tachyon Edge Worker",
+			"subtitle": "src/",
+			"order": 1
+		},
+		{
+			"id": "cloudflare",
+			"label": "Cloudflare bindings",
+			"subtitle": "wrangler.jsonc",
+			"order": 2
+		},
+		{
+			"id": "origin",
+			"label": "HTTP Origin",
+			"subtitle": "optional",
+			"order": 3
+		}
+	],
+	"nodes": [
+		{
+			"id": "plugin",
+			"label": "Tachyon plugin",
+			"kind": "app",
+			"delta": "unchanged",
+			"lane": "wordpress",
+			"files": [],
+			"badges": [],
+			"subtitle": "writes Tachyon URLs",
+			"summary": "Rewrites image URLs to TACHYON_URL with resize, crop, fit and other arguments; signs private images with presign=."
+		},
+		{
+			"id": "browser",
+			"label": "Browser",
+			"kind": "ui",
+			"delta": "unchanged",
+			"lane": "wordpress",
+			"files": [],
+			"badges": [],
+			"subtitle": "GET image URL",
+			"summary": "Requests the Variant. X-WebP: 1 must be set by a rule in front of the Worker; the Worker does no content negotiation."
+		},
+		{
+			"id": "worker",
+			"label": "worker.ts",
+			"kind": "service",
+			"delta": "unchanged",
+			"lane": "worker",
+			"files": [
+				{
+					"path": "src/worker.ts"
+				}
+			],
+			"badges": [],
+			"subtitle": "handleRequest · serve",
+			"summary": "Orchestrates a request: authorize, cache lookup, fetch, transform or pass through, cache write, error mapping."
+		},
+		{
+			"id": "contract",
+			"label": "contract.ts",
+			"kind": "module",
+			"delta": "unchanged",
+			"lane": "worker",
+			"files": [
+				{
+					"path": "src/contract.ts"
+				}
+			],
+			"badges": [],
+			"subtitle": "parseRequest",
+			"summary": "Turns the URL into a TachyonRequest: Object Key, validated arguments, WebP choice, Presign."
+		},
+		{
+			"id": "sigv4",
+			"label": "sigv4.ts",
+			"kind": "module",
+			"delta": "unchanged",
+			"lane": "worker",
+			"files": [
+				{
+					"path": "src/sigv4.ts"
+				}
+			],
+			"badges": [],
+			"subtitle": "verifyPresign",
+			"summary": "Recomputes the S3 SigV4 query signature for private prefixes."
+		},
+		{
+			"id": "origin-mod",
+			"label": "origin.ts",
+			"kind": "module",
+			"delta": "unchanged",
+			"lane": "worker",
+			"files": [
+				{
+					"path": "src/origin.ts"
+				}
+			],
+			"badges": [],
+			"subtitle": "fetchOriginal",
+			"summary": "Reads an Original by storage key from R2 or the HTTP Origin."
+		},
+		{
+			"id": "probe",
+			"label": "probe.ts",
+			"kind": "module",
+			"delta": "unchanged",
+			"lane": "worker",
+			"files": [
+				{
+					"path": "src/probe.ts"
+				}
+			],
+			"badges": [],
+			"subtitle": "probe · toSource",
+			"summary": "Reads format, size and EXIF orientation from the header."
+		},
+		{
+			"id": "geometry",
+			"label": "geometry.ts",
+			"kind": "module",
+			"delta": "unchanged",
+			"lane": "worker",
+			"files": [
+				{
+					"path": "src/geometry.ts"
+				}
+			],
+			"badges": [
+				"oracle-tested"
+			],
+			"subtitle": "plan",
+			"summary": "Computes Tachyon v3.0.8's output geometry as explicit binding steps. No I/O."
+		},
+		{
+			"id": "cache",
+			"label": "Cache API",
+			"kind": "cache",
+			"delta": "unchanged",
+			"lane": "cloudflare",
+			"files": [
+				{
+					"path": "src/worker.ts"
+				}
+			],
+			"badges": [],
+			"subtitle": "Variant cache",
+			"summary": "Keyed by URL plus a hash of PROCESSING_VERSION, Origin identity and WebP choice."
+		},
+		{
+			"id": "r2",
+			"label": "R2 bucket",
+			"kind": "datastore",
+			"delta": "unchanged",
+			"lane": "cloudflare",
+			"files": [
+				{
+					"path": "wrangler.jsonc"
+				}
+			],
+			"badges": [],
+			"subtitle": "BUCKET",
+			"summary": "Holds Originals when TACHYON_ORIGIN=r2."
+		},
+		{
+			"id": "images",
+			"label": "Images binding",
+			"kind": "external",
+			"delta": "unchanged",
+			"lane": "cloudflare",
+			"files": [
+				{
+					"path": "wrangler.jsonc"
+				}
+			],
+			"badges": [],
+			"subtitle": "IMAGES",
+			"summary": "Applies trim, squeeze, cover, border and orientation steps, then encodes the Variant."
+		},
+		{
+			"id": "http-origin",
+			"label": "HTTP Origin",
+			"kind": "external",
+			"delta": "unchanged",
+			"lane": "origin",
+			"files": [
+				{
+					"path": "src/origin.ts"
+				}
+			],
+			"badges": [],
+			"subtitle": "TACHYON_HTTP_ORIGIN",
+			"summary": "Used instead of R2 when TACHYON_ORIGIN=http."
+		}
+	],
+	"edges": [
+		{
+			"id": "plugin-browser",
+			"from": "plugin",
+			"to": "browser",
+			"kind": "render",
+			"delta": "unchanged",
+			"label": "Tachyon URL in HTML",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "browser-worker",
+			"from": "browser",
+			"to": "worker",
+			"kind": "http",
+			"delta": "unchanged",
+			"label": "GET ?resize=…",
+			"emphasis": "hero",
+			"animated": true,
+			"files": []
+		},
+		{
+			"id": "worker-contract",
+			"from": "worker",
+			"to": "contract",
+			"kind": "call",
+			"delta": "unchanged",
+			"label": "parse URL",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "worker-sigv4",
+			"from": "worker",
+			"to": "sigv4",
+			"kind": "call",
+			"delta": "unchanged",
+			"label": "verify private presign",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "worker-cache",
+			"from": "worker",
+			"to": "cache",
+			"kind": "data",
+			"delta": "unchanged",
+			"label": "match / put",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "worker-origin",
+			"from": "worker",
+			"to": "origin-mod",
+			"kind": "call",
+			"delta": "unchanged",
+			"label": "fetch Original",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "origin-r2",
+			"from": "origin-mod",
+			"to": "r2",
+			"kind": "data",
+			"delta": "unchanged",
+			"label": "get key",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "origin-http",
+			"from": "origin-mod",
+			"to": "http-origin",
+			"kind": "http",
+			"delta": "unchanged",
+			"label": "GET key",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "worker-probe",
+			"from": "worker",
+			"to": "probe",
+			"kind": "call",
+			"delta": "unchanged",
+			"label": "read header",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "worker-geometry",
+			"from": "worker",
+			"to": "geometry",
+			"kind": "call",
+			"delta": "unchanged",
+			"label": "plan geometry",
+			"emphasis": "normal",
+			"animated": false,
+			"files": []
+		},
+		{
+			"id": "worker-images",
+			"from": "worker",
+			"to": "images",
+			"kind": "call",
+			"delta": "unchanged",
+			"label": "transform + encode",
+			"emphasis": "hero",
+			"animated": true,
+			"files": []
+		}
+	],
+	"flows": [
+		{
+			"id": "public-miss",
+			"title": "Public image, cache miss",
+			"summary": "An unsigned GET for a public key that is not yet cached, read from R2.",
+			"delta": "unchanged",
+			"participants": [
+				{
+					"node": "browser"
+				},
+				{
+					"node": "worker"
+				},
+				{
+					"node": "contract"
+				},
+				{
+					"node": "cache"
+				},
+				{
+					"node": "origin-mod"
+				},
+				{
+					"node": "r2"
+				},
+				{
+					"node": "probe"
+				},
+				{
+					"node": "geometry"
+				},
+				{
+					"node": "images"
+				}
+			],
+			"messages": [
+				{
+					"id": "p-get",
+					"from": "browser",
+					"to": "worker",
+					"label": "GET /uploads/…/photo.jpg?resize=300,200",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-parse",
+					"from": "worker",
+					"to": "contract",
+					"label": "parseRequest",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-parsed",
+					"from": "contract",
+					"to": "worker",
+					"label": "Object Key, args, WebP",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-match",
+					"from": "worker",
+					"to": "cache",
+					"label": "match(cacheKey)",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-miss",
+					"from": "cache",
+					"to": "worker",
+					"label": "miss",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-fetch",
+					"from": "worker",
+					"to": "origin-mod",
+					"label": "fetchOriginal(storage key)",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-get-r2",
+					"from": "origin-mod",
+					"to": "r2",
+					"label": "get",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-body",
+					"from": "r2",
+					"to": "origin-mod",
+					"label": "Original stream",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-original",
+					"from": "origin-mod",
+					"to": "worker",
+					"label": "Original",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": [],
+					"note": "Over 20 MB (MAX_INPUT_BYTES): passed through unmodified."
+				},
+				{
+					"id": "p-probe",
+					"from": "worker",
+					"to": "probe",
+					"label": "probe header",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-source",
+					"from": "probe",
+					"to": "worker",
+					"label": "format, size, orientation",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-plan",
+					"from": "worker",
+					"to": "geometry",
+					"label": "plan(source, args)",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-steps",
+					"from": "geometry",
+					"to": "worker",
+					"label": "steps, format, quality",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-transform",
+					"from": "worker",
+					"to": "images",
+					"label": "input · transform · output",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-variant",
+					"from": "images",
+					"to": "worker",
+					"label": "Variant",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": [],
+					"note": "Error 9413 (animation of 100 MP or more): Original passed through."
+				},
+				{
+					"id": "p-response",
+					"from": "worker",
+					"to": "browser",
+					"label": "200 · max-age=31536000",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "p-put",
+					"from": "worker",
+					"to": "cache",
+					"label": "waitUntil(cache.put)",
+					"kind": "async",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				}
+			]
+		},
+		{
+			"id": "private-presign",
+			"title": "Private image with presign",
+			"summary": "A presigned GET for a key under TACHYON_PRIVATE_PREFIXES. Never cached by the Worker.",
+			"delta": "unchanged",
+			"participants": [
+				{
+					"node": "browser"
+				},
+				{
+					"node": "worker"
+				},
+				{
+					"node": "contract"
+				},
+				{
+					"node": "sigv4"
+				},
+				{
+					"node": "origin-mod"
+				},
+				{
+					"node": "r2"
+				},
+				{
+					"node": "images"
+				}
+			],
+			"messages": [
+				{
+					"id": "s-get",
+					"from": "browser",
+					"to": "worker",
+					"label": "GET …?presign=…",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-parse",
+					"from": "worker",
+					"to": "contract",
+					"label": "parseRequest",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-parsed",
+					"from": "contract",
+					"to": "worker",
+					"label": "Object Key, Presign",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-verify",
+					"from": "worker",
+					"to": "sigv4",
+					"label": "verifyPresign",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-ok",
+					"from": "sigv4",
+					"to": "worker",
+					"label": "valid, seconds left",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": [],
+					"note": "Missing credentials, missing presign, expired or bad signature: 404 File not found."
+				},
+				{
+					"id": "s-fetch",
+					"from": "worker",
+					"to": "origin-mod",
+					"label": "fetchOriginal",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-get-r2",
+					"from": "origin-mod",
+					"to": "r2",
+					"label": "get",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-body",
+					"from": "r2",
+					"to": "origin-mod",
+					"label": "Original",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-original",
+					"from": "origin-mod",
+					"to": "worker",
+					"label": "Original",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-transform",
+					"from": "worker",
+					"to": "images",
+					"label": "transform (after probe + plan)",
+					"kind": "sync",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-variant",
+					"from": "images",
+					"to": "worker",
+					"label": "Variant",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				},
+				{
+					"id": "s-response",
+					"from": "worker",
+					"to": "browser",
+					"label": "200 · max-age=remaining validity",
+					"kind": "return",
+					"delta": "unchanged",
+					"animated": true,
+					"files": []
+				}
+			]
+		}
+	],
+	"views": [
+		{
+			"id": "overview",
+			"title": "Tachyon Edge architecture",
+			"lens": "architecture",
+			"summary": "Components, bindings and Origins.",
+			"scope": {
+				"kind": "all"
+			},
+			"defaultOpen": true,
+			"children": []
+		},
+		{
+			"id": "public-miss-view",
+			"title": "Public image, cache miss",
+			"lens": "data-flow",
+			"scope": {
+				"kind": "selection",
+				"flows": [
+					"public-miss"
+				]
+			}
+		},
+		{
+			"id": "private-presign-view",
+			"title": "Private image with presign",
+			"lens": "data-flow",
+			"scope": {
+				"kind": "selection",
+				"flows": [
+					"private-presign"
+				]
+			}
+		}
+	],
+	"layout": {
+		"direction": "right",
+		"laneOrder": [
+			"wordpress",
+			"worker",
+			"cloudflare",
+			"origin"
+		]
+	}
+}

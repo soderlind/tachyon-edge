@@ -1,0 +1,12 @@
+{
+	"name": "tachyon-edge-diagrams",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"render": "node render.mjs graph.json out"
+	},
+	"dependencies": {
+		"@coldtea/pr-lens-renderer": "0.4.1",
+		"@coldtea/pr-lens-schema": "0.9.0"
+	}
+}

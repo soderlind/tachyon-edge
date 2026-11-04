@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Changed
+
+- README architecture drawing replaced with PR Lens diagrams (overview and request flows, light and dark) generated from `docs/diagrams/graph.json`.
+
 ## [0.1.1] - 2026-11-05
 
 ### Added

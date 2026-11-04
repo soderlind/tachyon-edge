@@ -6,18 +6,19 @@ It is a drop-in replacement for [Human Made Tachyon](https://github.com/humanmad
 
 ## Architecture
 
-```
-WordPress (tachyon-plugin) ──► https://images.example.com/uploads/2026/11/photo.jpg?resize=300,200
-                                     │
-                              Cloudflare Worker (src/worker.ts)
-                                ├─ contract.ts   parse the plugin URL and arguments
-                                ├─ sigv4.ts      verify presigns for private prefixes
-                                ├─ Cache API     unsigned Variants, keyed by WebP choice
-                                ├─ origin.ts     R2 binding (BUCKET) or HTTP origin
-                                ├─ probe.ts      read dimensions and EXIF orientation from the header
-                                ├─ geometry.ts   compute Tachyon's exact output geometry
-                                └─ IMAGES        trim / squeeze / cover / border, then encode
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/out/overview-dark.svg">
+  <img alt="Tachyon Edge architecture: the Tachyon plugin writes URLs, the browser requests them from worker.ts, which uses contract.ts, sigv4.ts, probe.ts, geometry.ts and origin.ts, and the Cache API, R2 bucket, Images binding and optional HTTP Origin." src="docs/diagrams/out/overview-light.svg">
+</picture>
+
+A public request that misses the cache:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/out/public-miss-view-dark.svg">
+  <img alt="Sequence for an unsigned public request: parse the URL, cache miss, fetch the Original from R2, probe the header, plan the geometry, transform with the Images binding, respond, then store the Variant in the cache." src="docs/diagrams/out/public-miss-view-light.svg">
+</picture>
+
+The private, presigned flow and the diagram sources are in [docs/diagrams](docs/diagrams).
 
 The Worker does not rely on Cloudflare's `fit` heuristics. `geometry.ts` reproduces the arithmetic of Tachyon's Sharp pipeline, including `withoutEnlargement` rounding, JPEG shrink-on-load, EXIF rotation, `zoom` and the `px` Release Quirks. It then sends the binding explicit pixel operations ([ADR 0007](docs/adr/0007-process-with-the-cloudflare-images-binding.md)). A test oracle runs Tachyon v3.0.8's own code to check that the dimensions match ([ADR 0011](docs/adr/0011-geometry-oracle-and-remote-smoke-tests.md)).
 
