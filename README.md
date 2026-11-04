@@ -6,17 +6,17 @@ It is a drop-in replacement for [Human Made Tachyon](https://github.com/humanmad
 
 ## Architecture
 
-<picture>
+<a href="docs/diagrams/out/overview-light.png"><picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/out/overview-dark.svg">
   <img alt="Tachyon Edge architecture: the Tachyon plugin writes URLs, the browser requests them from worker.ts, which uses contract.ts, sigv4.ts, probe.ts, geometry.ts and origin.ts, and the Cache API, R2 bucket, Images binding and optional HTTP Origin." src="docs/diagrams/out/overview-light.svg">
-</picture>
+</picture></a>
 
 A public request that misses the cache:
 
-<picture>
+<a href="docs/diagrams/out/public-miss-view-light.png"><picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/out/public-miss-view-dark.svg">
   <img alt="Sequence for an unsigned public request: parse the URL, cache miss, fetch the Original from R2, probe the header, plan the geometry, transform with the Images binding, respond, then store the Variant in the cache." src="docs/diagrams/out/public-miss-view-light.svg">
-</picture>
+</picture></a>
 
 The private, presigned flow and the diagram sources are in [docs/diagrams](docs/diagrams).
 
