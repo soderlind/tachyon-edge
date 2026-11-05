@@ -51,7 +51,7 @@ node tests/acceptance/wp-site.mjs cleanup   # optional
 
 ### Local (by Flywheel)
 
-A bare `wp` does not reach Local's database. Point `WP_CLI` at a wrapper that runs WP-CLI with the site's PHP and MySQL socket, and run the commands from inside the site's directory:
+A bare `wp` does not reach Local's database. Point `WP_CLI` at the wrapper from the [wp-cli-local skill](https://github.com/soderlind/skills/tree/main/skills/wp-cli-local), which runs WP-CLI with the site's PHP and MySQL socket. Install it with `npx skills add soderlind/skills --skill wp-cli-local`, and run the commands from inside the site's directory:
 
 ```sh
 cd ~/Sites/<site>/app/public/wp-content/plugins/tachyon-edge
