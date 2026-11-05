@@ -1,17 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1708 770" width="1708" height="770" role="img" aria-label="Tachyon Edge architecture" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Noto Sans&quot;, Helvetica, Arial, sans-serif">
+<svg data-lane-colors="1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1708 770" width="1708" height="770" role="img" aria-label="Tachyon Edge architecture" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Noto Sans&quot;, Helvetica, Arial, sans-serif">
 <title>Tachyon Edge architecture</title>
 <desc>Components, bindings and Origins.</desc>
 <defs><pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1" fill="rgba(140,149,159,.5)"/></pattern><marker id="mk-added" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f883d"/></marker><marker id="mko-added" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2,1 L10,5 L2,9" fill="none" stroke="#1f883d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="mk-modified" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#bf8700"/></marker><marker id="mko-modified" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2,1 L10,5 L2,9" fill="none" stroke="#bf8700" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="mk-removed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#cf222e"/></marker><marker id="mko-removed" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2,1 L10,5 L2,9" fill="none" stroke="#cf222e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="mk-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8c959f"/></marker><marker id="mko-neutral" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2,1 L10,5 L2,9" fill="none" stroke="#8c959f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
 <rect x="0" y="0" width="1708" height="770" rx="12" fill="#f4f5f7"/>
 <rect x="0" y="0" width="1708" height="770" rx="12" fill="url(#dots)"/>
-<g><rect class="lanebox" x="16" y="44" width="404" height="710" rx="12" fill="rgba(255,255,255,.55)"/>
-<text class="lanelabel" x="32" y="68" font-size="10" font-weight="700" letter-spacing=".12em" fill="#59636e">WORDPRESS · TACHYON-PLUGIN</text>
-<rect class="lanebox" x="440" y="44" width="404" height="710" rx="12" fill="rgba(255,255,255,.55)"/>
-<text class="lanelabel" x="456" y="68" font-size="10" font-weight="700" letter-spacing=".12em" fill="#59636e">TACHYON EDGE WORKER · SRC/</text>
-<rect class="lanebox" x="864" y="44" width="404" height="710" rx="12" fill="rgba(255,255,255,.55)"/>
-<text class="lanelabel" x="880" y="68" font-size="10" font-weight="700" letter-spacing=".12em" fill="#59636e">CLOUDFLARE BINDINGS · WRANGLER.JSONC</text>
-<rect class="lanebox" x="1288" y="44" width="404" height="710" rx="12" fill="rgba(255,255,255,.55)"/>
-<text class="lanelabel" x="1304" y="68" font-size="10" font-weight="700" letter-spacing=".12em" fill="#59636e">HTTP ORIGIN · OPTIONAL</text></g>
+<g><rect class="lanebox" x="16" y="44" width="404" height="710" rx="12" fill="rgba(9,105,218,0.06)" stroke="rgba(9,105,218,0.25)" stroke-width="1"/>
+<text class="lanelabel" x="32" y="68" font-size="10" font-weight="700" letter-spacing=".12em" fill="#0969da">WORDPRESS · TACHYON-PLUGIN</text>
+<rect class="lanebox" x="440" y="44" width="404" height="710" rx="12" fill="rgba(188,76,0,0.06)" stroke="rgba(188,76,0,0.25)" stroke-width="1"/>
+<text class="lanelabel" x="456" y="68" font-size="10" font-weight="700" letter-spacing=".12em" fill="#bc4c00">TACHYON EDGE WORKER · SRC/</text>
+<rect class="lanebox" x="864" y="44" width="404" height="710" rx="12" fill="rgba(154,103,0,0.06)" stroke="rgba(154,103,0,0.25)" stroke-width="1"/>
+<text class="lanelabel" x="880" y="68" font-size="10" font-weight="700" letter-spacing=".12em" fill="#9a6700">CLOUDFLARE BINDINGS · WRANGLER.JSONC</text>
+<rect class="lanebox" x="1288" y="44" width="404" height="710" rx="12" fill="rgba(191,57,137,0.06)" stroke="rgba(191,57,137,0.25)" stroke-width="1"/>
+<text class="lanelabel" x="1304" y="68" font-size="10" font-weight="700" letter-spacing=".12em" fill="#bf3989">HTTP ORIGIN · OPTIONAL</text></g>
 <g><path class="edge edge-neutral context" d="M218,154 L218,206" marker-end="url(#mk-neutral)" fill="none" stroke="#8c959f" stroke-width="1.5" opacity="0.82"/>
 <path class="glow" stroke="#8c959f" d="M404,237 L409,237 C411.76,237 414,239.24 414,242 L414,330 C414,341.6 423.4,351 435,351 L456,351" fill="none" stroke-width="7" opacity="0.14"/>
 <path class="edge edge-neutral hero context" d="M404,237 L409,237 C411.76,237 414,239.24 414,242 L414,330 C414,341.6 423.4,351 435,351 L456,351" marker-end="url(#mk-neutral)" fill="none" stroke="#8c959f" stroke-width="2.25" opacity="0.82"/>
@@ -31,59 +31,59 @@
 <circle r="3" fill="#8c959f"><animateMotion dur="2.1s" repeatCount="indefinite" path="M828,343 L831,343 C832.66,343 834,344.34 834,346 L834,375.5 C834,393.45 848.55,408 866.5,408 L1144,408 C1153.94,408 1162,416.06 1162,426 L1162,444"/></circle>
 <circle r="3" fill="#8c959f"><animateMotion dur="2.1s" begin="-1.4s" repeatCount="indefinite" path="M828,343 L831,343 C832.66,343 834,344.34 834,346 L834,375.5 C834,393.45 848.55,408 866.5,408 L1144,408 C1153.94,408 1162,416.06 1162,426 L1162,444"/></circle>
 <circle r="3" fill="#8c959f"><animateMotion dur="2.1s" begin="-0.7s" repeatCount="indefinite" path="M828,343 L831,343 C832.66,343 834,344.34 834,346 L834,375.5 C834,393.45 848.55,408 866.5,408 L1144,408 C1153.94,408 1162,416.06 1162,426 L1162,444"/></circle></g>
-<g><g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="32" y="92" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="46" y="110" width="26" height="26" rx="7" fill="#f1f3f5"/><g><rect class="glyph-stroke" x="52" y="117" width="14" height="12" rx="2" stroke="#59636e" stroke-width="1.4" fill="none"/>
-<path class="glyph-stroke" d="M52,121 h14" stroke="#59636e" stroke-width="1.4" fill="none"/></g>
+<g><g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="32" y="92" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(9,105,218,0.55)"/>
+<rect class="chip" x="46" y="110" width="26" height="26" rx="7" fill="rgba(9,105,218,0.12)"/><g><rect class="glyph-stroke" x="52" y="117" width="14" height="12" rx="2" stroke="#0969da" stroke-width="1.4" fill="none"/>
+<path class="glyph-stroke" d="M52,121 h14" stroke="#0969da" stroke-width="1.4" fill="none"/></g>
 <text class="ntitle" x="82" y="119" font-size="13" font-weight="600" fill="#1f2328">Tachyon plugin</text>
 <text class="nsub" x="82" y="137" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">writes Tachyon URLs</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="32" y="206" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="46" y="224" width="26" height="26" rx="7" fill="#f1f3f5"/><g><rect class="glyph-stroke" x="52" y="231" width="14" height="12" rx="2" stroke="#59636e" stroke-width="1.4" fill="none"/>
-<path class="glyph-stroke" d="M56.5,231 v12" stroke="#59636e" stroke-width="1.4" fill="none"/></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="32" y="206" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(9,105,218,0.55)"/>
+<rect class="chip" x="46" y="224" width="26" height="26" rx="7" fill="rgba(9,105,218,0.12)"/><g><rect class="glyph-stroke" x="52" y="231" width="14" height="12" rx="2" stroke="#0969da" stroke-width="1.4" fill="none"/>
+<path class="glyph-stroke" d="M56.5,231 v12" stroke="#0969da" stroke-width="1.4" fill="none"/></g>
 <text class="ntitle" x="82" y="233" font-size="13" font-weight="600" fill="#1f2328">Browser</text>
 <text class="nsub" x="82" y="251" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">GET image URL</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="456" y="320" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="470" y="338" width="26" height="26" rx="7" fill="#f1f3f5"/><g><rect class="glyph-stroke" x="476.5" y="344.5" width="13" height="13" rx="3" stroke="#59636e" stroke-width="1.4" fill="none"/>
-<circle class="glyph" fill="#59636e" cx="483" cy="351" r="2"/></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="456" y="320" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(188,76,0,0.55)"/>
+<rect class="chip" x="470" y="338" width="26" height="26" rx="7" fill="rgba(188,76,0,0.12)"/><g><rect class="glyph-stroke" x="476.5" y="344.5" width="13" height="13" rx="3" stroke="#bc4c00" stroke-width="1.4" fill="none"/>
+<circle class="glyph" fill="#bc4c00" cx="483" cy="351" r="2"/></g>
 <text class="ntitle" x="506" y="347" font-size="13" font-weight="600" fill="#1f2328">worker.ts</text>
 <text class="nsub" x="506" y="365" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">handleRequest · serve</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="456" y="444" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="470" y="462" width="26" height="26" rx="7" fill="#f1f3f5"/><g><text class="glyph" x="483" y="479.5" text-anchor="middle" fill="#59636e" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="456" y="444" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(188,76,0,0.55)"/>
+<rect class="chip" x="470" y="462" width="26" height="26" rx="7" fill="rgba(188,76,0,0.12)"/><g><text class="glyph" x="483" y="479.5" text-anchor="middle" fill="#bc4c00" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
 <text class="ntitle" x="506" y="471" font-size="11.5" font-weight="600" fill="#1f2328">contract.ts</text>
 <text class="nsub" x="506" y="489" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">parseRequest</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="648" y="444" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="662" y="462" width="26" height="26" rx="7" fill="#f1f3f5"/><g><text class="glyph" x="675" y="479.5" text-anchor="middle" fill="#59636e" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="648" y="444" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(188,76,0,0.55)"/>
+<rect class="chip" x="662" y="462" width="26" height="26" rx="7" fill="rgba(188,76,0,0.12)"/><g><text class="glyph" x="675" y="479.5" text-anchor="middle" fill="#bc4c00" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
 <text class="ntitle" x="698" y="471" font-size="11.5" font-weight="600" fill="#1f2328">sigv4.ts</text>
 <text class="nsub" x="698" y="489" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">verifyPresign</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="456" y="558" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="470" y="576" width="26" height="26" rx="7" fill="#f1f3f5"/><g><text class="glyph" x="483" y="593.5" text-anchor="middle" fill="#59636e" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="456" y="558" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(188,76,0,0.55)"/>
+<rect class="chip" x="470" y="576" width="26" height="26" rx="7" fill="rgba(188,76,0,0.12)"/><g><text class="glyph" x="483" y="593.5" text-anchor="middle" fill="#bc4c00" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
 <text class="ntitle" x="506" y="585" font-size="11.5" font-weight="600" fill="#1f2328">probe.ts</text>
 <text class="nsub" x="506" y="603" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">probe · toSource</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="648" y="558" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="662" y="576" width="26" height="26" rx="7" fill="#f1f3f5"/><g><text class="glyph" x="675" y="593.5" text-anchor="middle" fill="#59636e" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="648" y="558" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(188,76,0,0.55)"/>
+<rect class="chip" x="662" y="576" width="26" height="26" rx="7" fill="rgba(188,76,0,0.12)"/><g><text class="glyph" x="675" y="593.5" text-anchor="middle" fill="#bc4c00" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
 <text class="ntitle" x="698" y="585" font-size="11.5" font-weight="600" fill="#1f2328">geometry.ts</text>
 <text class="nsub" x="698" y="603" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">plan</text>
-<g class="bdg bdg-neutral"><rect x="744.29" y="550" width="76.71" height="16" rx="8" fill="#f1f3f5" stroke="#d1d9e0" stroke-width="1"/><text x="782.65" y="561" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing=".06em" fill="#59636e">oracle-tested</text></g></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="456" y="672" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="470" y="690" width="26" height="26" rx="7" fill="#f1f3f5"/><g><text class="glyph" x="483" y="707.5" text-anchor="middle" fill="#59636e" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
+<g class="bdg bdg-neutral"><rect x="744.29" y="550" width="76.71" height="16" rx="8" fill="#ffffff" stroke="none" stroke-width="1"/><rect x="744.29" y="550" width="76.71" height="16" rx="8" fill="rgba(188,76,0,0.12)" stroke="rgba(188,76,0,0.55)" stroke-width="1"/><text x="782.65" y="561" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing=".06em" fill="#bc4c00">oracle-tested</text></g></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="456" y="672" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(188,76,0,0.55)"/>
+<rect class="chip" x="470" y="690" width="26" height="26" rx="7" fill="rgba(188,76,0,0.12)"/><g><text class="glyph" x="483" y="707.5" text-anchor="middle" fill="#bc4c00" font-size="11" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">{ }</text></g>
 <text class="ntitle" x="506" y="699" font-size="13" font-weight="600" fill="#1f2328">origin.ts</text>
 <text class="nsub" x="506" y="717" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">fetchOriginal</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="880" y="444" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="894" y="462" width="26" height="26" rx="7" fill="#f1f3f5"/><g><path class="glyph" fill="#59636e" d="M908,468 L901,476 H906 L906,482 L913,474 H908 Z"/></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="880" y="444" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(154,103,0,0.55)"/>
+<rect class="chip" x="894" y="462" width="26" height="26" rx="7" fill="rgba(154,103,0,0.12)"/><g><path class="glyph" fill="#9a6700" d="M908,468 L901,476 H906 L906,482 L913,474 H908 Z"/></g>
 <text class="ntitle" x="930" y="471" font-size="11.5" font-weight="600" fill="#1f2328">Cache API</text>
 <text class="nsub" x="930" y="489" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">Variant cache</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="1072" y="444" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="1086" y="462" width="26" height="26" rx="7" fill="#f1f3f5"/><g><rect class="glyph-stroke" x="1091" y="469" width="16" height="12" rx="2" stroke="#59636e" stroke-width="1.4" fill="none"/>
-<path class="glyph-stroke" d="M1091,471 l8,6 8,-6" stroke="#59636e" stroke-width="1.4" fill="none"/></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="1072" y="444" width="180" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(154,103,0,0.55)"/>
+<rect class="chip" x="1086" y="462" width="26" height="26" rx="7" fill="rgba(154,103,0,0.12)"/><g><rect class="glyph-stroke" x="1091" y="469" width="16" height="12" rx="2" stroke="#9a6700" stroke-width="1.4" fill="none"/>
+<path class="glyph-stroke" d="M1091,471 l8,6 8,-6" stroke="#9a6700" stroke-width="1.4" fill="none"/></g>
 <text class="ntitle" x="1122" y="471" font-size="11.5" font-weight="600" fill="#1f2328">Images binding</text>
 <text class="nsub" x="1122" y="489" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">IMAGES</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="880" y="558" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="894" y="576" width="26" height="26" rx="7" fill="#f1f3f5"/><g><ellipse class="glyph-stroke" stroke="#59636e" stroke-width="1.4" fill="none" cx="907" cy="584.5" rx="6.5" ry="2.6"/>
-<path class="glyph-stroke" d="M900.5,584.5 v9 a6.5,2.6 0 0 0 13 0 v-9" stroke="#59636e" stroke-width="1.4" fill="none"/></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="880" y="558" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(154,103,0,0.55)"/>
+<rect class="chip" x="894" y="576" width="26" height="26" rx="7" fill="rgba(154,103,0,0.12)"/><g><ellipse class="glyph-stroke" stroke="#9a6700" stroke-width="1.4" fill="none" cx="907" cy="584.5" rx="6.5" ry="2.6"/>
+<path class="glyph-stroke" d="M900.5,584.5 v9 a6.5,2.6 0 0 0 13 0 v-9" stroke="#9a6700" stroke-width="1.4" fill="none"/></g>
 <text class="ntitle" x="930" y="585" font-size="13" font-weight="600" fill="#1f2328">R2 bucket</text>
 <text class="nsub" x="930" y="603" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">BUCKET</text></g>
-<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="1304" y="558" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1" stroke="#d1d9e0"/>
-<rect class="chip" x="1318" y="576" width="26" height="26" rx="7" fill="#f1f3f5"/><g><rect class="glyph-stroke" x="1323" y="583" width="16" height="12" rx="2" stroke="#59636e" stroke-width="1.4" fill="none"/>
-<path class="glyph-stroke" d="M1323,585 l8,6 8,-6" stroke="#59636e" stroke-width="1.4" fill="none"/></g>
+<g class="cardsh context" filter="drop-shadow(0 1px 2px rgba(31,35,40,.14))" opacity="0.82"><rect class="card" x="1304" y="558" width="372" height="62" rx="10" fill="#ffffff" stroke-width="1.5" stroke="rgba(191,57,137,0.55)"/>
+<rect class="chip" x="1318" y="576" width="26" height="26" rx="7" fill="rgba(191,57,137,0.12)"/><g><rect class="glyph-stroke" x="1323" y="583" width="16" height="12" rx="2" stroke="#bf3989" stroke-width="1.4" fill="none"/>
+<path class="glyph-stroke" d="M1323,585 l8,6 8,-6" stroke="#bf3989" stroke-width="1.4" fill="none"/></g>
 <text class="ntitle" x="1354" y="585" font-size="13" font-weight="600" fill="#1f2328">HTTP Origin</text>
 <text class="nsub" x="1354" y="603" font-size="9.5" fill="#59636e" font-family="ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, monospace">TACHYON_HTTP_ORIGIN</text></g></g>
 <g><g><rect class="lpill" x="158.8" y="172.5" width="118.4" height="15" rx="7.5" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/><text class="ltext" x="218" y="183.5" text-anchor="middle" font-size="9.5" font-weight="600" fill="#59636e">Tachyon URL in HTML</text></g>

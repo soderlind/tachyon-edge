@@ -19,6 +19,8 @@ for f in out/*.svg; do rsvg-convert -o "${f%.svg}.png" "$f"; done
 
 `render.mjs` validates the graph and refuses to overwrite existing SVGs, so remove `out/` first. Update `provenance` in `graph.json` to the commit the diagrams describe.
 
+`npm run render` also runs [colorize.mjs](colorize.mjs), which colors each lane, because PR Lens only colors by change. It maps cards to lanes by node label, and lane boxes, lifelines and badges by position. WordPress is blue, the Worker orange, Cloudflare bindings amber and the HTTP Origin rose, matching the [Tachyon R2 diagrams](https://github.com/soderlind/tachyon-r2/tree/main/docs/diagrams). Change colors in `LANE_COLORS`.
+
 ## Source map
 
 | Element | Evidence |
