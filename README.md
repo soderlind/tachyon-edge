@@ -24,6 +24,8 @@ A public request that misses the cache:
 
 The private, presigned flow and the diagram sources are in [docs/diagrams](docs/diagrams).
 
+Diagrams created with [Illustrate Design](https://github.com/soderlind/skills#illustrate-design).
+
 The Worker does not rely on Cloudflare's `fit` heuristics. `geometry.ts` reproduces the arithmetic of Tachyon's Sharp pipeline, including `withoutEnlargement` rounding, JPEG shrink-on-load, EXIF rotation, `zoom` and the `px` Release Quirks. It then sends the binding explicit pixel operations ([ADR 0007](docs/adr/0007-process-with-the-cloudflare-images-binding.md)). A test oracle runs Tachyon v3.0.8's own code to check that the dimensions match ([ADR 0011](docs/adr/0011-geometry-oracle-and-remote-smoke-tests.md)).
 
 Components, request flow, invariants and where to make changes are described in [docs/architecture.md](docs/architecture.md). Decisions are recorded in [docs/adr](docs/adr). The project language is in [GLOSSARY.md](GLOSSARY.md).
