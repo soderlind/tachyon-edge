@@ -114,6 +114,7 @@ The Worker does not retry anything. Error responses are never written to the cac
 | Configuration | `npm test`, and the Wrangler build command on deploy | `TACHYON_R2_BUCKET` matches the bound bucket in `wrangler.jsonc` |
 | Type check | `npm run check:worker` | Source and binding interfaces against `@cloudflare/workers-types` |
 | Remote smoke | `npm run test:remote` (see [README.md](../README.md#development)) | Geometry and binding semantics on a deployed Worker with the real Images binding, including AVIF input and the animation limit |
+| WP-CLI acceptance | `npm run test:acceptance` (see [acceptance-test.md](acceptance-test.md)) | URLs that tachyon-plugin 0.11.1 generates in WordPress (image src, srcset and `the_content`) return the declared dimensions, type and cache header from a deployed Worker |
 
 The local fake binding is only as accurate as the remote smoke suite that checks it. When the binding's behavior is in doubt, run the remote suite ([ADR 0011](adr/0011-geometry-oracle-and-remote-smoke-tests.md)).
 

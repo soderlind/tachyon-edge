@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- WP-CLI acceptance test (`npm run test:acceptance`): installs tachyon-plugin 0.11.1 on a WordPress site, imports fixtures, and checks every URL WordPress generates against a deployed Worker. See `docs/acceptance-test.md`.
+
 ### Changed
 
 - README architecture drawing replaced with PR Lens diagrams (overview and request flows, light and dark) generated from `docs/diagrams/graph.json`.

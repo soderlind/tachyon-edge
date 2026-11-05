@@ -13,6 +13,7 @@
 		"check:worker": "tsc --noEmit -p tsconfig.worker.json",
 		"test": "jest --runInBand",
 		"test:remote": "jest --runInBand --testMatch '<rootDir>/tests/remote/smoke-remote.ts'",
+		"test:acceptance": "jest --runInBand --testMatch '<rootDir>/tests/acceptance/acceptance.ts'",
 		"lint": "eslint --ext .ts src tests",
 		"dev:worker": "wrangler dev",
 		"deploy:worker": "wrangler deploy"

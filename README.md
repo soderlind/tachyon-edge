@@ -97,6 +97,13 @@ node tests/remote/prepare.mjs /tmp/tachyon-smoke tachyon-uploads
 TACHYON_SMOKE_URL=https://<worker>/uploads/ TACHYON_SMOKE_FIXTURES=/tmp/tachyon-smoke npm run test:remote
 ```
 
+The WP-CLI acceptance test installs the Tachyon plugin on a WordPress site, uploads media and checks every image URL WordPress generates against the deployed Worker ([docs/acceptance-test.md](docs/acceptance-test.md)):
+
+```sh
+TACHYON_URL=https://<worker>/uploads node tests/acceptance/wp-site.mjs prepare
+TACHYON_URL=https://<worker>/uploads npm run test:acceptance
+```
+
 ## API reference
 
 See [docs/using.md](docs/using.md).
