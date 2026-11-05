@@ -71,6 +71,59 @@ define( 'TACHYON_SERVER_VERSION', '3.0.0' ); // presigned private images use `pr
 
 To serve WebP to browsers that accept it, add a Transform Rule or another Worker in front that sets `X-WebP: 1` when `Accept` contains `image/webp`. The Worker caches WebP and non-WebP Variants separately.
 
+## Uploading images
+
+The Tachyon plugin only rewrites image URLs; it never uploads files. To get new uploads into the bucket, use one of these plugins. Both write to the Object Keys the Worker expects (`uploads/…`, or `uploads/sites/N/…` on multisite). Create an [R2 API token](https://developers.cloudflare.com/r2/api/tokens/) with *Object Read & Write* on the bucket for either one.
+
+| | [S3 Uploads](https://github.com/humanmade/S3-Uploads) (Human Made) | [Tachyon R2](https://github.com/soderlind/tachyon-r2) |
+|---|---|---|
+| Install | Composer | Release zip |
+| What goes to R2 | All uploads | Images the Worker serves; other files stay local |
+| Local files | Never written | Kept (sync), deleted after upload (offload) or never written (stream) |
+| Thumbnails | Written to R2 | Written to R2, or skipped and resized by Tachyon on request |
+| Private uploads | Signed URLs; set `TACHYON_PRIVATE_PREFIXES` (R2 ignores the private ACL) | Not supported |
+
+### S3 Uploads
+
+```sh
+composer require humanmade/s3-uploads
+```
+
+```php
+define( 'S3_UPLOADS_BUCKET', 'tachyon-uploads' );
+define( 'S3_UPLOADS_REGION', 'auto' );
+define( 'S3_UPLOADS_KEY', '...' );     // R2 access key ID
+define( 'S3_UPLOADS_SECRET', '...' );  // R2 secret access key
+define( 'S3_UPLOADS_BUCKET_URL', 'https://tachyon-edge.<subdomain>.workers.dev' ); // Originals through the Worker
+```
+
+Point the S3 client at R2 in an mu-plugin, for example `wp-content/mu-plugins/s3-uploads-r2.php`:
+
+```php
+add_filter( 's3_uploads_s3_client_params', function ( $params ) {
+	$params['endpoint'] = 'https://<account_id>.r2.cloudflarestorage.com';
+	$params['use_path_style_endpoint'] = true;
+	return $params;
+} );
+```
+
+R2 has no per-object ACLs, so attachments S3 Uploads marks private are not protected by the bucket. Put them under a prefix listed in `TACHYON_PRIVATE_PREFIXES` and set the `TACHYON_SIGNING_*` variables so the Worker checks the presigned URLs ([ADR 0009](docs/adr/0009-verify-presigns-for-private-prefixes.md)).
+
+### Tachyon R2
+
+Download `tachyon-r2.zip` from the [latest release](https://github.com/soderlind/tachyon-r2/releases), install and activate it, then configure it in **Settings → Tachyon R2** or in `wp-config.php`:
+
+```php
+define( 'TACHYON_R2_ACCOUNT_ID', '...' );
+define( 'TACHYON_R2_ACCESS_KEY_ID', '...' );
+define( 'TACHYON_R2_SECRET_ACCESS_KEY', '...' );
+define( 'TACHYON_R2_BUCKET', 'tachyon-uploads' );
+define( 'TACHYON_R2_MODE', 'offload' );        // sync | offload | stream
+define( 'TACHYON_R2_SKIP_THUMBNAILS', true );  // optional
+```
+
+The key prefix is taken from the path of `TACHYON_URL`. Check the connection with `wp tachyon-r2 status`, and copy an existing library with `wp tachyon-r2 sync --all`. See the [Tachyon R2 README](https://github.com/soderlind/tachyon-r2#readme) for the upload methods and limitations.
+
 ## Differences from Tachyon v3.0.8
 
 These are listed in [ADR 0006](docs/adr/0006-compatibility-target-is-the-wordpress-plugin.md):
