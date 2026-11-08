@@ -2,7 +2,7 @@
 	"schemaVersion": "0.3.0",
 	"kind": "graph",
 	"title": "Tachyon Edge architecture",
-	"summary": "Current state at release 0.1.1: one Cloudflare Worker serves Tachyon plugin URLs, reads Originals from R2 or HTTP, computes Tachyon v3.0.8 geometry, and encodes Variants with the Images binding.",
+	"summary": "Current state at release 0.1.2: one Cloudflare Worker serves Tachyon plugin URLs, reads Originals from R2 or HTTP, computes Tachyon v3.0.8 geometry, and encodes Variants with the Images binding.",
 	"lenses": [
 		"architecture",
 		"data-flow"
@@ -14,11 +14,11 @@
 			"host": "github.com"
 		},
 		"base": {
-			"sha": "f1554d420876b43a057797ccf78d3dba33cbfb08",
+			"sha": "a76b5b3d6d86f191faf2ade2d7c8057b8a202226",
 			"ref": "main"
 		},
 		"head": {
-			"sha": "f1554d420876b43a057797ccf78d3dba33cbfb08",
+			"sha": "a76b5b3d6d86f191faf2ade2d7c8057b8a202226",
 			"ref": "main"
 		},
 		"generator": {
