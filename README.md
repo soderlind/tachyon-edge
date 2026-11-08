@@ -6,6 +6,12 @@ It is a drop-in replacement for [Human Made Tachyon](https://github.com/humanmad
 
 ## Architecture
 
+In short: WordPress stores Originals in R2, the Tachyon plugin writes image URLs that point at the Worker, and the Worker resizes on request.
+
+<img alt="WordPress uses the Tachyon plugin to write image URLs and Tachyon R2 or S3 Uploads to store Originals in an R2 bucket. The browser requests a Tachyon URL from the Tachyon Edge Worker, which reads the Original from R2 and returns the resized image." src="docs/how-it-fits.svg">
+
+In detail:
+
 <a href="https://raw.githubusercontent.com/soderlind/tachyon-edge/main/docs/diagrams/out/overview-light.svg">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/out/overview-dark.svg">

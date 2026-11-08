@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" role="img" aria-labelledby="title desc">
+	<title id="title">How Tachyon Edge, R2 and the WordPress plugins fit together</title>
+	<desc id="desc">WordPress uses the Tachyon plugin to write image URLs and Tachyon R2 or S3 Uploads to upload Originals to an R2 bucket. The browser requests a Tachyon URL from the Tachyon Edge Worker, which reads the Original from R2, resizes it and returns the image.</desc>
+	<style>
+		.bg { fill: #ffffff; }
+		.text { fill: #1f2328; font: 14px system-ui, -apple-system, "Segoe UI", sans-serif; }
+		.muted { fill: #59636e; font-size: 12px; }
+		.heading { font-size: 15px; font-weight: 600; }
+		.title { font-size: 17px; font-weight: 700; }
+		.wp-box { fill: #eef5ff; stroke: #0969da; }
+		.wp-card { fill: #ffffff; stroke: #0969da; }
+		.cf-box { fill: #fff6ed; stroke: #d1600f; }
+		.edge-card { fill: #ffffff; stroke: #d1600f; }
+		.r2-card { fill: #fffbea; stroke: #b08800; }
+		.browser-card { fill: #f6f8fa; stroke: #59636e; }
+		.box { stroke-width: 1.5; }
+		.arrow { stroke: #59636e; stroke-width: 1.8; fill: none; marker-end: url(#arrowhead); }
+		.arrowhead { fill: #59636e; }
+		.label-bg { fill: #ffffff; }
+		@media (prefers-color-scheme: dark) {
+			.bg { fill: #0d1117; }
+			.text { fill: #e6edf3; }
+			.muted { fill: #9198a1; }
+			.wp-box { fill: #0c2d6b; stroke: #4493f8; }
+			.wp-card { fill: #0d1117; stroke: #4493f8; }
+			.cf-box { fill: #3d1d06; stroke: #f0883e; }
+			.edge-card { fill: #0d1117; stroke: #f0883e; }
+			.r2-card { fill: #2e2508; stroke: #d29922; }
+			.browser-card { fill: #161b22; stroke: #9198a1; }
+			.arrow { stroke: #9198a1; }
+			.arrowhead { fill: #9198a1; }
+			.label-bg { fill: #0d1117; }
+		}
+	</style>
+	<defs>
+		<marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+			<path class="arrowhead" d="M0,0 L10,5 L0,10 z"/>
+		</marker>
+	</defs>
+
+	<rect class="bg" width="1000" height="400"/>
+
+	<!-- WordPress -->
+	<rect class="wp-box box" x="20" y="30" width="270" height="320" rx="14"/>
+	<text class="text title" x="40" y="60">WordPress</text>
+	<rect class="wp-card box" x="40" y="80" width="230" height="90" rx="10"/>
+	<text class="text heading" x="56" y="108">Tachyon plugin</text>
+	<text class="text muted" x="56" y="130">Rewrites image URLs to</text>
+	<text class="text muted" x="56" y="148">the Worker, e.g. ?w=300</text>
+	<rect class="wp-card box" x="40" y="220" width="230" height="110" rx="10"/>
+	<text class="text heading" x="56" y="248">Tachyon R2 or S3 Uploads</text>
+	<text class="text muted" x="56" y="270">Uploads Originals to R2.</text>
+	<text class="text muted" x="56" y="288">The Tachyon plugin itself</text>
+	<text class="text muted" x="56" y="306">never uploads files.</text>
+
+	<!-- Browser -->
+	<rect class="browser-card box" x="410" y="70" width="190" height="70" rx="10"/>
+	<text class="text heading" x="505" y="100" text-anchor="middle">Browser</text>
+	<text class="text muted" x="505" y="121" text-anchor="middle">Visitor loads the page</text>
+
+	<!-- Cloudflare -->
+	<rect class="cf-box box" x="710" y="30" width="270" height="320" rx="14"/>
+	<text class="text title" x="730" y="60">Cloudflare</text>
+	<rect class="edge-card box" x="730" y="80" width="230" height="90" rx="10"/>
+	<text class="text heading" x="746" y="108">Tachyon Edge Worker</text>
+	<text class="text muted" x="746" y="130">Resizes with the Images</text>
+	<text class="text muted" x="746" y="148">binding and caches Variants</text>
+	<rect class="r2-card box" x="730" y="220" width="230" height="110" rx="10"/>
+	<text class="text heading" x="746" y="248">R2 bucket</text>
+	<text class="text muted" x="746" y="270">Stores the Originals at</text>
+	<text class="text muted" x="746" y="288">uploads/2026/11/photo.jpg</text>
+
+	<!-- 1: plugin writes URLs into the page -->
+	<path class="arrow" d="M270,135 L408,110"/>
+	<text class="text muted" x="338" y="80" text-anchor="middle">1 · page with</text>
+	<text class="text muted" x="338" y="96" text-anchor="middle">Tachyon URLs</text>
+
+	<!-- 2: browser requests a Variant -->
+	<path class="arrow" d="M600,95 L728,95"/>
+	<text class="text muted" x="655" y="84" text-anchor="middle">2 · GET ?w=300</text>
+
+	<!-- 4: Worker returns the Variant -->
+	<path class="arrow" d="M730,145 L602,125"/>
+	<text class="text muted" x="655" y="166" text-anchor="middle">4 · resized image</text>
+
+	<!-- 3: Worker reads the Original -->
+	<path class="arrow" d="M845,170 L845,218"/>
+	<text class="text muted" x="855" y="199">3 · read Original</text>
+
+	<!-- Upload -->
+	<path class="arrow" d="M270,275 L728,275"/>
+	<rect class="label-bg" x="405" y="258" width="190" height="18"/>
+	<text class="text muted" x="500" y="271" text-anchor="middle">on upload · store Original</text>
+
+	<text class="text muted" x="500" y="380" text-anchor="middle">Uploads go to R2 once. Each requested size is made by the Worker on demand and cached.</text>
+</svg>
