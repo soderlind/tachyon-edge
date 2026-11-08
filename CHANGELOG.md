@@ -12,6 +12,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - README architecture drawing replaced with PR Lens diagrams (overview and request flows, light and dark) generated from `docs/diagrams/graph.json`.
 
+### Fixed
+
+- Updated the test-only Sharp and minimatch dependencies and removed an unused legacy ESLint package to resolve their security advisories. Recorded historical geometry preserves the Tachyon reference where patched Sharp changes EXIF resize results.
+
 ## [0.1.1] - 2026-11-05
 
 ### Added
