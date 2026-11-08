@@ -85,7 +85,7 @@ The Worker does not retry anything. Error responses are never written to the cac
 
 | Rule | Enforced by | Verified by |
 |---|---|---|
-| Output dimensions match Tachyon v3.0.8 for every argument combination | `plan`, `orientationTransforms`, `toSource` | `tests/test-geometry-oracle.ts` (oracle in `tests/oracle/tachyon-v3.0.8.ts`; do not edit it), `tests/test-worker.ts`, `tests/remote/smoke-remote.ts` |
+| Output dimensions match Tachyon v3.0.8 for every argument combination | `plan`, `orientationTransforms`, `toSource` | `tests/test-geometry-oracle.ts` (oracle in `tests/oracle/tachyon-v3.0.8.ts`; only documented compatibility updates; recorded historical geometry where Sharp changed), `tests/test-worker.ts`, `tests/remote/smoke-remote.ts` |
 | Arguments are validated exactly like Tachyon, including Release Quirks | `validateArgs`, `lambdaQuery` | `tests/test-contract.ts` |
 | Private storage keys are served only with a verified, unexpired Presign; missing credentials fail closed | `isPrivate`, `authorize`, `verifyPresign` | `tests/test-worker.ts` ("private prefixes and presigns"), `tests/test-sigv4.ts` |
 | A cached Variant is reused only for the same URL, processing behavior, Origin and WebP choice | `cacheKey`, `originIdentity`, `PROCESSING_VERSION` | `tests/test-worker.ts` ("cache") |
@@ -109,7 +109,7 @@ The Worker does not retry anything. Error responses are never written to the cac
 
 | Layer | Command | What it proves |
 |---|---|---|
-| Geometry oracle | `npm test` | The planner matches Tachyon v3.0.8's own Sharp pipeline on fixtures and random sizes |
+| Geometry oracle | `npm test` | The planner matches Tachyon v3.0.8's Sharp pipeline on fixtures and random sizes, using recorded historical geometry where the patched Sharp output differs |
 | Contract, SigV4 and Worker | `npm test` | Parsing, presign verification and end-to-end Worker behavior, using a Sharp-backed fake binding |
 | Configuration | `npm test`, and the Wrangler build command on deploy | `TACHYON_R2_BUCKET` matches the bound bucket in `wrangler.jsonc` |
 | Type check | `npm run check:worker` | Source and binding interfaces against `@cloudflare/workers-types` |

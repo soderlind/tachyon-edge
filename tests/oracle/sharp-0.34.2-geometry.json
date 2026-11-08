@@ -1,0 +1,23 @@
+[
+	{"name":"exif-3.jpg","args":{"w":"300"},"legacy":{"size":[300,195],"format":"image/jpeg"},"patched":{"size":[300,194],"format":"image/jpeg"}},
+	{"name":"exif-3.jpg","args":{"w":"150","h":"150"},"legacy":{"size":[150,98],"format":"image/jpeg"},"patched":{"size":[150,97],"format":"image/jpeg"}},
+	{"name":"exif-3.jpg","args":{"fit":"300,300"},"legacy":{"size":[300,195],"format":"image/jpeg"},"patched":{"size":[300,194],"format":"image/jpeg"}},
+	{"name":"exif-3.jpg","args":{"fit":"300,0"},"legacy":{"size":[300,195],"format":"image/jpeg"},"patched":{"size":[300,194],"format":"image/jpeg"}},
+	{"name":"exif-3.jpg","args":{"fit":"0,123"},"legacy":{"size":[189,123],"format":"image/jpeg"},"patched":{"size":[190,123],"format":"image/jpeg"}},
+	{"name":"exif-3.jpg","args":{"lb":"300,0"},"legacy":{"size":[300,195],"format":"image/jpeg"},"patched":{"size":[300,194],"format":"image/jpeg"}},
+	{"name":"exif-6.jpg","args":{"w":"300"},"legacy":{"size":[300,461],"format":"image/jpeg"},"patched":{"size":[300,462],"format":"image/jpeg"}},
+	{"name":"exif-6.jpg","args":{"w":"150","h":"150"},"legacy":{"size":[98,150],"format":"image/jpeg"},"patched":{"size":[97,150],"format":"image/jpeg"}},
+	{"name":"exif-6.jpg","args":{"fit":"300,300"},"legacy":{"size":[195,300],"format":"image/jpeg"},"patched":{"size":[194,300],"format":"image/jpeg"}},
+	{"name":"exif-6.jpg","args":{"fit":"300,0"},"legacy":{"size":[300,461],"format":"image/jpeg"},"patched":{"size":[300,462],"format":"image/jpeg"}},
+	{"name":"exif-6.jpg","args":{"fit":"0,123"},"legacy":{"size":[80,123],"format":"image/jpeg"},"patched":{"size":[79,123],"format":"image/jpeg"}},
+	{"name":"exif-6.jpg","args":{"lb":"300,0"},"legacy":{"size":[300,461],"format":"image/jpeg"},"patched":{"size":[300,462],"format":"image/jpeg"}},
+	{"name":"exif-8.jpg","args":{"w":"300"},"legacy":{"size":[300,461],"format":"image/jpeg"},"patched":{"size":[300,462],"format":"image/jpeg"}},
+	{"name":"exif-8.jpg","args":{"w":"150","h":"150"},"legacy":{"size":[98,150],"format":"image/jpeg"},"patched":{"size":[97,150],"format":"image/jpeg"}},
+	{"name":"exif-8.jpg","args":{"fit":"300,300"},"legacy":{"size":[195,300],"format":"image/jpeg"},"patched":{"size":[194,300],"format":"image/jpeg"}},
+	{"name":"exif-8.jpg","args":{"fit":"300,0"},"legacy":{"size":[300,461],"format":"image/jpeg"},"patched":{"size":[300,462],"format":"image/jpeg"}},
+	{"name":"exif-8.jpg","args":{"fit":"0,123"},"legacy":{"size":[80,123],"format":"image/jpeg"},"patched":{"size":[79,123],"format":"image/jpeg"}},
+	{"name":"exif-8.jpg","args":{"lb":"300,0"},"legacy":{"size":[300,461],"format":"image/jpeg"},"patched":{"size":[300,462],"format":"image/jpeg"}},
+	{"name":"exif-3.jpg","args":{"w":"333","h":"77"},"legacy":{"size":[118,77],"format":"image/jpeg"},"patched":{"size":[119,77],"format":"image/jpeg"}},
+	{"name":"exif-3.jpg","args":{"resize":"150px,100"},"legacy":{"size":[154,100],"format":"image/jpeg"},"patched":{"size":[155,100],"format":"image/jpeg"}},
+	{"name":"exif-6.webp","args":{"w":"333","h":"77"},"legacy":{"size":[39,77],"format":"image/webp"},"patched":{"size":[38,77],"format":"image/webp"}}
+]

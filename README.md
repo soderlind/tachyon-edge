@@ -145,7 +145,7 @@ npm run check:worker  # type-check against @cloudflare/workers-types
 npx wrangler deploy --dry-run
 ```
 
-Sharp is a dev dependency only. It runs the Tachyon v3.0.8 oracle ([tests/oracle](tests/oracle)) and backs the fake Images binding ([tests/helpers/fake-images.ts](tests/helpers/fake-images.ts)). The `wrangler dev` Images simulation is low-fidelity. Before production traffic, run the remote smoke test against a deployed Worker ([ADR 0011](docs/adr/0011-geometry-oracle-and-remote-smoke-tests.md)). Deploy with `TACHYON_PRIVATE_PREFIXES=uploads/private/` and no signing credentials, then:
+Sharp is a dev dependency only. It runs the Tachyon v3.0.8 oracle ([tests/oracle](tests/oracle)) and backs the fake Images binding ([tests/helpers/fake-images.ts](tests/helpers/fake-images.ts)). Where patched Sharp changes EXIF resize results, the tests also check recorded historical geometry ([ADR 0011](docs/adr/0011-geometry-oracle-and-remote-smoke-tests.md)). The `wrangler dev` Images simulation is low-fidelity. Before production traffic, run the remote smoke test against a deployed Worker ([ADR 0011](docs/adr/0011-geometry-oracle-and-remote-smoke-tests.md)). Deploy with `TACHYON_PRIVATE_PREFIXES=uploads/private/` and no signing credentials, then:
 
 ```sh
 node tests/remote/prepare.mjs /tmp/tachyon-smoke tachyon-uploads

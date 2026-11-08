@@ -4,12 +4,13 @@
  */
 import { readFileSync } from 'fs';
 
-import sharp from 'sharp';
+import sharp, { type OutputInfo } from 'sharp';
 
 import { validateArgs, TachyonArgs } from '../src/contract';
 import { plan, PlanError } from '../src/geometry';
 import { probe, toSource } from '../src/probe';
 
+import legacyGeometry from './oracle/sharp-0.34.2-geometry.json';
 import { resizeBuffer, Args } from './oracle/tachyon-v3.0.8';
 
 type Fixture = { name: string; bytes: Buffer };
@@ -17,6 +18,11 @@ type Fixture = { name: string; bytes: Buffer };
 const fixtures: Fixture[] = [];
 
 const ANIMATED = new Set( [ 'animated.gif', 'animated.webp' ] );
+
+const LEGACY_GEOMETRY = new Map( legacyGeometry.map( record => [
+	`${ record.name } ${ JSON.stringify( record.args ) }`,
+	record,
+] as const ) );
 
 const FORMAT_MIME: Record<string, string> = {
 	jpeg: 'image/jpeg',
@@ -127,9 +133,8 @@ const ARG_SETS: TachyonArgs[] = [
 ];
 
 /** The image both pipelines see: per-page height for animations. */
-function frameSize( info: sharp.OutputInfo ): [ number, number ] {
-	const pageHeight = ( info as sharp.OutputInfo & { pageHeight?: number } ).pageHeight;
-	return [ info.width, pageHeight || info.height ];
+function frameSize( info: OutputInfo ): [ number, number ] {
+	return [ info.width, info.pageHeight || info.height ];
 }
 
 beforeAll( async () => {
@@ -202,11 +207,20 @@ describe( 'planner matches Tachyon v3.0.8 geometry', () => {
 	const cases = [ 'briefing-copywriting.jpg', 'hdr.jpg', 'Website.png', 'humans.png', 'icons.png', 'animated.gif', 'animated.webp', 'exif-3.jpg', 'exif-6.jpg', 'exif-8.jpg', 'exif-6.png', 'exif-6.webp', 'small.png', 'odd.jpg', 'small.webp' ]
 		.flatMap( name => ARG_SETS.map( args => [ name, args ] as const ) );
 
+	test( 'all recorded legacy cases are exercised', () => {
+		const keys = new Set( cases.map( ( [ name, args ] ) => `${ name } ${ JSON.stringify( args ) }` ) );
+		expect( LEGACY_GEOMETRY.size ).toBe( legacyGeometry.length );
+		for ( const key of LEGACY_GEOMETRY.keys() ) {
+			expect( keys.has( key ) ).toBe( true );
+		}
+	} );
+
 	test.each( cases )( '%s %j', async ( name, rawArgs ) => {
 		const fixture = fixtures.find( f => f.name === name )!;
 		const probed = probe( fixture.bytes )!;
 		const source = toSource( probed.format, probed.width!, probed.height!, probed.orientation );
 		const args = validateArgs( rawArgs );
+		const legacy = LEGACY_GEOMETRY.get( `${ name } ${ JSON.stringify( rawArgs ) }` );
 
 		let expected: { size: [ number, number ]; format: string } | Error;
 		try {
@@ -217,6 +231,18 @@ describe( 'planner matches Tachyon v3.0.8 geometry', () => {
 			};
 		} catch ( error ) {
 			expected = error as Error;
+		}
+
+		if ( legacy ) {
+			if ( expected instanceof Error ) {
+				throw expected;
+			}
+			expect( expected ).toEqual( legacy.patched );
+			expect( legacy.legacy.size ).toHaveLength( 2 );
+			expected = {
+				size: [ legacy.legacy.size[0], legacy.legacy.size[1] ],
+				format: legacy.legacy.format,
+			};
 		}
 
 		if ( expected instanceof Error ) {
@@ -238,6 +264,17 @@ describe( 'planner matches Tachyon v3.0.8 geometry', () => {
 			size: [ result.width, result.height ],
 			format: result.format,
 		} ).toEqual( expected );
+	} );
+} );
+
+describe( 'Tachyon oracle input handling', () => {
+	test( 'preserves tolerance of truncated JPEGs', async () => {
+		const image = readFileSync( `${ __dirname }/images/briefing-copywriting.jpg` );
+		const truncated = image.subarray( 0, image.length - 2 );
+		await expect( sharp( truncated ).toBuffer() ).rejects.toThrow();
+		const { info } = await resizeBuffer( truncated, { w: '300' } );
+		expect( info.width ).toBe( 300 );
+		expect( info.format ).toBe( 'jpeg' );
 	} );
 } );
 

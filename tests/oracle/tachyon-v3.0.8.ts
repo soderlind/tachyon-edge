@@ -1,8 +1,9 @@
 /**
  * Test oracle: the image-processing path of Tachyon v3.0.8 (commit 6308671),
- * copied unchanged apart from removing the S3 client. Dev-only; never deployed.
+ * copied with the S3 client removed and Sharp 0.35 compatibility updates.
+ * Dev-only; never deployed.
  */
-import sharp from 'sharp';
+import sharp, { type OutputInfo } from 'sharp';
 import smartcrop from 'smartcrop-sharp';
 
 export interface Args {
@@ -63,7 +64,7 @@ function applyZoomCompression( defaultValue: number, zoom: number ): number {
 
 type ResizeBufferResult = {
 	data: Buffer;
-	info: sharp.OutputInfo & {
+	info: OutputInfo & {
 		errors: string;
 	}
 };
@@ -76,7 +77,7 @@ export async function resizeBuffer(
 	args: Args
 ): Promise<ResizeBufferResult> {
 	const image = sharp( buffer, {
-		failOnError: false,
+		failOn: 'none',
 		animated: true,
 	} ).withMetadata();
 
