@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-08
+
 ### Added
 
 - WP-CLI acceptance test (`npm run test:acceptance`): installs tachyon-plugin 0.11.1 on a WordPress site, imports fixtures, and checks every URL WordPress generates against a deployed Worker. See `docs/acceptance-test.md`.
@@ -11,6 +13,8 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Changed
 
 - README architecture drawing replaced with PR Lens diagrams (overview and request flows, light and dark) generated from `docs/diagrams/graph.json`.
+- Documented uploads using S3 Uploads or Tachyon R2 and linked the WP-CLI local setup skill.
+- Updated the security reporting contact.
 
 ### Fixed
 
@@ -78,6 +82,7 @@ See ADR 0006 for the full list.
 - Percentage crops and `entropy`/`attention` on animated images return an image instead of an error.
 - Fractional zoomed sizes are rounded instead of raising an error.
 
-[Unreleased]: https://github.com/soderlind/tachyon-edge/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/soderlind/tachyon-edge/compare/0.1.2...HEAD
+[0.1.2]: https://github.com/soderlind/tachyon-edge/compare/0.1.1...0.1.2
 [0.1.1]: https://github.com/soderlind/tachyon-edge/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/soderlind/tachyon-edge/releases/tag/0.1.0
