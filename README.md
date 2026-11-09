@@ -1,6 +1,6 @@
 # Tachyon Edge
 
-Tachyon Edge is an image service for the [Tachyon WordPress plugin](https://github.com/humanmade/tachyon-plugin). It runs as a single Cloudflare Worker, processes images with the [Cloudflare Images binding](https://developers.cloudflare.com/images/transform-images/bindings/), and reads Originals from R2 or over HTTP.
+Tachyon Edge is an image service for the Tachyon WordPress plugin: [Tachyon Edge Images](https://github.com/soderlind/tachyon-edge-images) or [tachyon-plugin](https://github.com/humanmade/tachyon-plugin). It runs as a single Cloudflare Worker, processes images with the [Cloudflare Images binding](https://developers.cloudflare.com/images/transform-images/bindings/), and reads Originals from R2 or over HTTP.
 
 It is a drop-in replacement for [Human Made Tachyon](https://github.com/humanmade/tachyon) v3.0.8 as far as the plugin is concerned. URLs, arguments, output sizes, crops, formats, status codes and cache headers follow the Plugin Contract ([ADR 0006](docs/adr/0006-compatibility-target-is-the-wordpress-plugin.md)). Pixels and file sizes differ, because the encoder is Cloudflare's rather than Sharp's.
 
@@ -70,7 +70,7 @@ Private prefixes fail closed. If signing credentials are missing, every private 
 
 ### WordPress
 
-Install the [Tachyon plugin](https://github.com/humanmade/tachyon-plugin) and point it at the Worker:
+Install a Tachyon plugin and point it at the Worker. Use [Tachyon Edge Images](https://github.com/soderlind/tachyon-edge-images), a compatible fork with extra fixes, or the original [tachyon-plugin](https://github.com/humanmade/tachyon-plugin). Both read the same constants:
 
 ```php
 define( 'TACHYON_URL', 'https://tachyon-edge.<subdomain>.workers.dev/uploads' );
