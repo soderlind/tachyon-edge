@@ -31,7 +31,7 @@ The test fails if the plugin is inactive, if `TACHYON_URL` differs from the one 
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `TACHYON_URL` | (required) | What the plugin rewrites the uploads base URL to, e.g. `https://<worker>/uploads`. Loaded with `wp --require=tests/acceptance/tachyon-url.php`, so `wp-config.php` is never edited |
+| `TACHYON_URL` | (required) | What the plugin rewrites the uploads base URL to, e.g. `https://<worker>/uploads`. Loaded with `wp --require=tests/acceptance/tachyon-url.php`, so `wp-config.php` is never edited. If wp-config already defines it, see [below](#when-wp-configphp-already-defines-tachyon_url) |
 | `WP_CLI` | `wp` | Shell command that runs WP-CLI for the target install |
 | `WP_SITE_URL` | the `TACHYON_ACCEPTANCE_SLUG` sub-site | Existing site to use instead of creating a sub-site |
 | `TACHYON_ACCEPTANCE_SLUG` | `tachyon-acceptance` | Sub-site slug on a multisite |
@@ -61,12 +61,30 @@ node tests/acceptance/wp-site.mjs prepare
 npm run test:acceptance
 ```
 
+### When `wp-config.php` already defines `TACHYON_URL`
+
+`tests/acceptance/tachyon-url.php` runs before WP-CLI loads `wp-config.php`. If wp-config also defines `TACHYON_URL`, PHP prints `Warning: Constant TACHYON_URL already defined`. That warning ends up in the JSON output, and `prepare` fails with `SyntaxError: Unexpected token 'W'`.
+
+To avoid this:
+
+1. Export the same value that wp-config uses. The suite fails if the two differ.
+2. Remove `TACHYON_URL` from the environment of the WP-CLI process only. Then the require file does nothing, and wp-config's value is used:
+
+```sh
+export TACHYON_URL=https://tachyon-edge.<account>.workers.dev   # same as wp-config.php
+export WP_CLI="env -u TACHYON_URL bash ~/.agents/skills/wp-cli-local/scripts/wp"
+node tests/acceptance/wp-site.mjs prepare
+npm run test:acceptance
+```
+
+Leave out `/uploads` if wp-config leaves it out. The R2 keys follow the URL the plugin generates. Without `/uploads`, a sub-site file becomes `sites/N/YYYY/MM/<file>`.
+
 ## What `prepare` changes
 
 1. Creates the sub-site `/<TACHYON_ACCEPTANCE_SLUG>/` unless `WP_SITE_URL` is set. If another network plugin fatals in a site-creation hook after the site exists, `prepare` carries on with the site.
 2. Installs `tachyon-plugin` from the pinned GitHub archive if it is missing, fails unless the installed version is `0.11.1`, and activates it on the test site only.
 3. Imports the four fixtures with `wp media import` and marks them with the `_tachyon_acceptance` post meta.
-4. Uploads each Original to R2. The key is the path of the plugin's URL for the attachment. On a multisite, the plugin strips `/sites/N` from the uploads base URL before rewriting it, so a sub-site file becomes `uploads/sites/N/YYYY/MM/<file>`.
+4. Uploads each Original to R2. The key is the path of the plugin's URL for the attachment. On a multisite, the plugin strips `/sites/N` from the uploads base URL before rewriting it. With `TACHYON_URL` ending in `/uploads`, a sub-site file becomes `uploads/sites/N/YYYY/MM/<file>`.
 
 `cleanup` reverses all four steps. It deletes the plugin unless `TACHYON_ACCEPTANCE_KEEP_PLUGIN` is set. If you had `tachyon-plugin` installed before the test, set that variable.
 
