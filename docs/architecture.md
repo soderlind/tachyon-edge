@@ -41,7 +41,7 @@ Cloudflare resources, configured in [wrangler.jsonc](../wrangler.jsonc):
 | `IMAGES` | `worker.ts` | Images binding: `info` for sizing formats the probe cannot size, and `input().transform().output()` |
 | `BUCKET` | `origin.ts` | R2 bucket holding Originals when `TACHYON_ORIGIN=r2` |
 | `TACHYON_*` vars and the `TACHYON_SIGNING_SECRET_ACCESS_KEY` secret | `worker.ts`, `origin.ts` | See the configuration table in [README.md](../README.md#configuration) |
-| `build.command` | Wrangler | Runs `scripts/check-config.mjs` before every deploy and `wrangler dev`, so a `TACHYON_R2_BUCKET` that differs from `bucket_name` fails the deploy |
+| `build.command` | Wrangler | Runs `scripts/check-config.mjs` before every deploy and `wrangler dev`, so a `TACHYON_R2_BUCKET` that differs from `bucket_name` fails the deploy. `npm run deploy` first syncs it with `--sync` |
 
 ## Representative flow: `GET /uploads/2026/11/photo.jpg?resize=300,200`
 

@@ -1,5 +1,5 @@
 import { execFileSync } from 'child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -11,9 +11,9 @@ const dir = mkdtempSync( join( tmpdir(), 'tachyon-config-' ) );
 /**
  * Run the config check and return its exit status and stderr.
  */
-function check( file?: string ): { status: number; stderr: string } {
+function check( ...args: string[] ): { status: number; stderr: string } {
 	try {
-		execFileSync( process.execPath, file ? [ script, file ] : [ script ], {
+		execFileSync( process.execPath, [ script, ...args ], {
 			cwd: join( __dirname, '..' ),
 			stdio: 'pipe',
 		} );
@@ -80,5 +80,32 @@ describe( 'TACHYON_R2_BUCKET config check', () => {
 			"r2_buckets": [ { "binding": "BUCKET", "bucket_name": "one" } ],
 			"vars": { "TACHYON_ORIGIN": "http" }
 		}` ) ).status ).toBe( 0 );
+	} );
+
+	test( '--sync sets TACHYON_R2_BUCKET from bucket_name and keeps comments', () => {
+		const file = config( `{
+			// renamed by the Deploy to Cloudflare button
+			"r2_buckets": [ { "binding": "BUCKET", "bucket_name": "renamed" } ],
+			"vars": { "TACHYON_R2_BUCKET": "tachyon-uploads" },
+			"env": {
+				"staging": {
+					"r2_buckets": [ { "binding": "BUCKET", "bucket_name": "two" } ],
+					"vars": { "TACHYON_KEY_PREFIX": "" },
+				},
+			},
+		}` );
+		expect( check( '--sync', file ).status ).toBe( 0 );
+
+		const text = readFileSync( file, 'utf8' );
+		expect( text ).toContain( '// renamed by the Deploy to Cloudflare button' );
+		expect( text ).toContain( '"vars": { "TACHYON_R2_BUCKET": "renamed" }' );
+		expect( text ).toContain( '"vars": { "TACHYON_R2_BUCKET": "two", "TACHYON_KEY_PREFIX": "" }' );
+		expect( check( file ).status ).toBe( 0 );
+	} );
+
+	test( '--sync fails when there is no vars object to write to', () => {
+		const result = check( '--sync', config( '{ "r2_buckets": [ { "binding": "BUCKET", "bucket_name": "one" } ] }' ) );
+		expect( result.status ).toBe( 1 );
+		expect( result.stderr ).toContain( 'top level: vars.TACHYON_R2_BUCKET is null' );
 	} );
 } );

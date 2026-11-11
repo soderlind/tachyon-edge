@@ -38,16 +38,26 @@ Components, request flow, invariants and where to make changes are described in 
 
 ## Deploy
 
-You need a Cloudflare account with Images enabled; the binding is billed per unique transformation. You also need Node 24.
+You need a Cloudflare account with Images enabled; the binding is billed per unique transformation.
+
+### Deploy to Cloudflare button
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/soderlind/tachyon-edge)
+
+The button copies this repository to your GitHub or GitLab account, creates the R2 bucket, lets you set the [configuration](#configuration) and deploys with `npm run deploy`. Later pushes to your copy redeploy it. If you rename the bucket, `npm run deploy` sets `TACHYON_R2_BUCKET` to match. Without private uploads, keep the `TACHYON_SIGNING_SECRET_ACCESS_KEY` placeholder.
+
+### Manual deploy
+
+You need Node 24.
 
 ```sh
 npm ci
 npx wrangler login
 npx wrangler r2 bucket create tachyon-uploads   # or change bucket_name in wrangler.jsonc
-npx wrangler deploy
+npm run deploy
 ```
 
-Then copy your uploads into the bucket so that the Object Keys match the path after the Worker host. For example, `uploads/2026/11/photo.jpg` is served at `https://<worker>/uploads/2026/11/photo.jpg`. [rclone](https://developers.cloudflare.com/r2/examples/rclone/) and R2 [Super Slurper](https://developers.cloudflare.com/r2/data-migration/super-slurper/) can copy an existing S3 bucket.
+Either way, copy your uploads into the bucket so that the Object Keys match the path after the Worker host. For example, `uploads/2026/11/photo.jpg` is served at `https://<worker>/uploads/2026/11/photo.jpg`. [rclone](https://developers.cloudflare.com/r2/examples/rclone/) and R2 [Super Slurper](https://developers.cloudflare.com/r2/data-migration/super-slurper/) can copy an existing S3 bucket.
 
 ### Configuration
 
@@ -57,7 +67,7 @@ Set these variables in [wrangler.jsonc](wrangler.jsonc):
 |---|---|
 | `TACHYON_ORIGIN` | `r2` (default) reads from the `BUCKET` binding. `http` fetches from `TACHYON_HTTP_ORIGIN`. |
 | `TACHYON_HTTP_ORIGIN` | Base URL for the HTTP Origin, e.g. `https://example.com/wp-content/`. Upstream 403 and 404 become 404; other failures become 502. |
-| `TACHYON_R2_BUCKET` | Name of the bucket bound as `BUCKET`. It separates cached Variants per bucket. `wrangler deploy` fails if it differs from `bucket_name`, and the Worker skips its cache if it is empty. |
+| `TACHYON_R2_BUCKET` | Name of the bucket bound as `BUCKET`. It separates cached Variants per bucket. `npm run deploy` sets it from `bucket_name`; `wrangler deploy` fails if it differs, and the Worker skips its cache if it is empty. |
 | `TACHYON_KEY_PREFIX` | Prepended to every Object Key before the Origin lookup. |
 | `TACHYON_PRIVATE_PREFIXES` | Comma-separated storage key prefixes (`TACHYON_KEY_PREFIX` + Object Key) that require a valid presign, e.g. `uploads/private/`. |
 | `TACHYON_SIGNING_ACCESS_KEY_ID` | The access key ID WordPress signs private URLs with. |

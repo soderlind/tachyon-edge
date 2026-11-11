@@ -4,7 +4,7 @@
 	"type": "module",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/humanmade/tachyon.git"
+		"url": "https://github.com/soderlind/tachyon-edge.git"
 	},
 	"description": "Cloudflare Worker image service for the Tachyon WordPress plugin, built on the Cloudflare Images binding",
 	"main": "src/worker.ts",
@@ -16,9 +16,49 @@
 		"test:acceptance": "jest --runInBand --testMatch '<rootDir>/tests/acceptance/acceptance.ts'",
 		"lint": "eslint --ext .ts src tests",
 		"dev:worker": "wrangler dev",
-		"deploy:worker": "wrangler deploy"
+		"deploy": "node scripts/check-config.mjs --sync && wrangler deploy"
 	},
-	"author": "Joe Hoyle",
+	"cloudflare": {
+		"bindings": {
+			"BUCKET": {
+				"description": "R2 bucket with the WordPress Originals. Object Keys must match the path after the Worker host, e.g. `uploads/2026/11/photo.jpg`."
+			},
+			"IMAGES": {
+				"description": "Cloudflare Images binding that resizes the images. Requires Images on the account; billed per unique transformation."
+			},
+			"TACHYON_ORIGIN": {
+				"description": "`r2` reads Originals from `BUCKET`. `http` fetches them from `TACHYON_HTTP_ORIGIN`."
+			},
+			"TACHYON_HTTP_ORIGIN": {
+				"description": "Only with `TACHYON_ORIGIN=http`: base URL of the Originals, e.g. `https://example.com/wp-content/`."
+			},
+			"TACHYON_R2_BUCKET": {
+				"description": "Set automatically to the `BUCKET` name by `npm run deploy`. It keeps cached Variants apart per bucket."
+			},
+			"TACHYON_KEY_PREFIX": {
+				"description": "Optional. Prepended to every Object Key before the Origin lookup."
+			},
+			"TACHYON_PRIVATE_PREFIXES": {
+				"description": "Optional. Comma-separated key prefixes that require a presigned URL, e.g. `uploads/private/`. Leave empty if you have no private uploads."
+			},
+			"TACHYON_SIGNING_ACCESS_KEY_ID": {
+				"description": "Only with private prefixes: the access key ID WordPress presigns private URLs with."
+			},
+			"TACHYON_SIGNING_HOST": {
+				"description": "Only with private prefixes: host in the presigned URL, e.g. `<account>.r2.cloudflarestorage.com`."
+			},
+			"TACHYON_SIGNING_PATH_PREFIX": {
+				"description": "Only with private prefixes: path before the key in the presigned URL, e.g. `/bucket`. Empty for virtual-hosted URLs."
+			},
+			"TACHYON_SIGNING_SECRET_ACCESS_KEY": {
+				"description": "Only with private prefixes: the secret access key WordPress presigns with. Without private prefixes, keep the placeholder."
+			}
+		}
+	},
+	"author": "Per Søderlind",
+	"contributors": [
+		"Joe Hoyle"
+	],
 	"license": "ISC",
 	"devDependencies": {
 		"@aws-sdk/client-s3": "^3.712.0",
