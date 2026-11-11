@@ -8,7 +8,7 @@
 		"enabled": true,
 		"redact_query_string": true
 	},
-	// Runs before every `wrangler deploy` and `wrangler dev`: TACHYON_R2_BUCKET must match bucket_name.
+	// Runs before every `wrangler deploy` and `wrangler dev`: TACHYON_R2_BUCKET must match bucket_name. `npm run deploy` sets it first.
 	"build": {
 		"command": "node scripts/check-config.mjs"
 	},

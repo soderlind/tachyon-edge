@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- Deploy to Cloudflare button in the README. It copies the repository, creates the R2 bucket and deploys; `package.json` describes each binding and variable for its setup page.
+- `npm run deploy` runs `scripts/check-config.mjs --sync`, which sets `TACHYON_R2_BUCKET` to the bound `bucket_name`, then `wrangler deploy`. Plain `wrangler deploy` still fails on a mismatch.
+
+### Changed
+
+- `npm run deploy:worker` is now `npm run deploy`.
+
 ## [0.1.2] - 2026-11-08
 
 ### Added
